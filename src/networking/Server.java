@@ -45,13 +45,9 @@ public class Server {
     
     public Object getDataBlocking(){
         try {
-            int avail = inStream.available();
-            System.out.println(avail);
-            if(avail > 0){
-                return inStream.readObject();
-            }
+            return inStream.readObject();
         } catch (IOException | ClassNotFoundException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.WARNING, null, ex);
+            //Logger.getLogger(Server.class.getName()).log(Level.WARNING, null, ex);
         }
         return null;
     }

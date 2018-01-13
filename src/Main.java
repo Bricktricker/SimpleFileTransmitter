@@ -22,6 +22,7 @@ public class Main {
                 System.out.println(info.getFilePath());
                 }
                 */
+                
 		/*
             try {
                 Server server = new Server(8080);
@@ -40,32 +41,24 @@ public class Main {
             } catch (IOException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-<<<<<<< HEAD
             */
-		
-=======
-            /*
->>>>>>> 700826bed2bae49a73ce7fd39b7e7d8c45230e44
+                
             try {
                 Client client = new Client("192.168.178.44", 8080);
                 client.sendData("Hello World");
                 Thread.sleep(5000);
                 client.sendData("from here");
+                client.disconnect();
             } catch (IOException | InterruptedException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-<<<<<<< HEAD
             
             try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-                
-=======
-             */   
->>>>>>> 700826bed2bae49a73ce7fd39b7e7d8c45230e44
+		Thread.sleep(2000);
+            } catch (InterruptedException e) {
+		e.printStackTrace();
+            }
+               
 		
 		System.out.println("finished");
 	}
