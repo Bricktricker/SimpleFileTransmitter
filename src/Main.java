@@ -14,12 +14,6 @@ public class Main {
 		FileStorage origStorage = new FileStorage();
 		origStorage.fillMap();
 		
-		try {
-			Thread.sleep(15000);
-		} catch (InterruptedException e) {
-			Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, e);
-		}
-		
             
                 /*
                 List<FileInfo> changes = origStorage.update();
@@ -32,22 +26,27 @@ public class Main {
                 Server server = new Server(8080);
                 server.waitForUser();
                 
-                Object o = server.getData();
-                if(o != null){
-                    System.out.println((String)o);
+                while(server.isConnected()){
+                    Object o = server.getDataBlocking();
+                    if(o != null){
+                        System.out.println((String)o);
+                    }else{
+                       // System.out.println("no data");
+                    }
                 }
+                
                 
             } catch (IOException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+            /*
             try {
                 Client client = new Client("localhost", 8080);
                 client.sendData("Hello World");
             } catch (IOException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-                
+             */   
 		
 		System.out.println("finished");
 	}

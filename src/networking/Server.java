@@ -33,6 +33,7 @@ public class Server {
     
     public void waitForUser() throws IOException{
         userSocket = socket.accept();
+        System.out.println("use connected: " + userSocket.toString());
         outStream = new ObjectOutputStream(userSocket.getOutputStream());
         inStream = new ObjectInputStream(userSocket.getInputStream());
     }
@@ -42,14 +43,21 @@ public class Server {
         outStream.flush();
     }
     
-    public Object getData(){
+    public Object getDataBlocking(){
         try {
-            Object obj = inStream.readObject();
-            return obj;
+            int avail = inStream.available();
+            System.out.println(avail);
+            if(avail > 0){
+                return inStream.readObject();
+            }
         } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(Server.class.getName()).log(Level.WARNING, null, ex);
-            return null;
         }
+        return null;
+    }
+    
+    public boolean isConnected(){
+        return !userSocket.isClosed();
     }
     
 }
