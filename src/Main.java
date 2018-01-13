@@ -14,12 +14,6 @@ public class Main {
 		FileStorage origStorage = new FileStorage();
 		origStorage.fillMap();
 		
-		try {
-			Thread.sleep(15000);
-		} catch (InterruptedException e) {
-			Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, e);
-		}
-		
             
                 /*
                 List<FileInfo> changes = origStorage.update();
@@ -28,6 +22,7 @@ public class Main {
                 System.out.println(info.getFilePath());
                 }
                 */
+		/*
             try {
                 Server server = new Server(8080);
                 server.waitForUser();
@@ -40,13 +35,23 @@ public class Main {
             } catch (IOException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+            */
+		
             try {
-                Client client = new Client("localhost", 8080);
+                Client client = new Client("192.168.178.44", 8080);
                 client.sendData("Hello World");
-            } catch (IOException ex) {
+                Thread.sleep(5000);
+                client.sendData("from here");
+            } catch (IOException | InterruptedException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
+            
+            try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
                 
 		
 		System.out.println("finished");
