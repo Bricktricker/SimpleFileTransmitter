@@ -18,29 +18,31 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import Utils.Pair;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FileStorage {
 	
-	private Path folder; //Project directory
+	private final Path folder; //Project directory
 	private HashMap<String, String> fileMap; //Map wit path, hash
 	
 	public FileStorage(String folder){
 		this.folder = Paths.get(folder);
-		fileMap = new HashMap<String, String>();
-		System.out.println(folder.toString());
+		fileMap = new HashMap<>();
+		System.out.println(folder);
 	}
 	
 	//Sets project directory to working directory
 	public FileStorage(){
 		Path currentRelativePath = Paths.get("");
 		folder = currentRelativePath.toAbsolutePath();
-		fileMap = new HashMap<String, String>();
+		fileMap = new HashMap<>();
 		System.out.println(folder.toString());
 	}
 	
 	//updates fileMap and return List of changes
 	public List<FileInfo> update(){
-		List<FileInfo> changes = new LinkedList<FileInfo>();
+		List<FileInfo> changes = new LinkedList<>();
 		FileStorage newStorage = new FileStorage(folder.toString());
 		update(changes, folder.toString(), newStorage);
 		
@@ -76,7 +78,7 @@ public class FileStorage {
 					newStorage.addFile(p, hash);
 				
 				} catch (NoSuchAlgorithmException | IOException e) {
-					e.printStackTrace();
+					Logger.getLogger(FileStorage.class.getName()).log(Level.SEVERE, null, e);
 				}
 			
 			//File is folder, add it recursively to List
@@ -159,7 +161,7 @@ public class FileStorage {
 	public List<Pair<String, String>> getAllFiles(){
 		List<Pair<String, String>> list = new ArrayList<>();
 		Set<Entry<String, String>> entries = fileMap.entrySet();
-	
+                
 		for(Entry<String, String> s : entries) {
 			Pair<String, String> pair = new Pair<>(s.getKey(), s.getValue());
 			list.add(pair);
