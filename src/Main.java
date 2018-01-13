@@ -22,6 +22,6 @@ public class Main {
 			System.out.println(info.getFilePath());
 		}
 		
-		System.out.println("fertig");
+		System.out.println("finished");
 	}
 }
