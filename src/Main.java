@@ -27,16 +27,25 @@ public class Main {
                 Server server = new Server(8080);
                 server.waitForUser();
                 
-                Object o = server.getData();
-                if(o != null){
-                    System.out.println((String)o);
+                while(server.isConnected()){
+                    Object o = server.getDataBlocking();
+                    if(o != null){
+                        System.out.println((String)o);
+                    }else{
+                       // System.out.println("no data");
+                    }
                 }
+                
                 
             } catch (IOException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
+<<<<<<< HEAD
             */
 		
+=======
+            /*
+>>>>>>> 700826bed2bae49a73ce7fd39b7e7d8c45230e44
             try {
                 Client client = new Client("192.168.178.44", 8080);
                 client.sendData("Hello World");
@@ -45,6 +54,7 @@ public class Main {
             } catch (IOException | InterruptedException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
+<<<<<<< HEAD
             
             try {
 				Thread.sleep(2000);
@@ -53,6 +63,9 @@ public class Main {
 				e.printStackTrace();
 			}
                 
+=======
+             */   
+>>>>>>> 700826bed2bae49a73ce7fd39b7e7d8c45230e44
 		
 		System.out.println("finished");
 	}
