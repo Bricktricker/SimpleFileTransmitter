@@ -18,10 +18,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import Utils.Pair;
+import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class FileStorage {
+public class FileStorage implements Serializable{
 	
 	private final Path folder; //Project directory
 	private HashMap<String, String> fileMap; //Map wit path, hash
@@ -184,5 +185,21 @@ public class FileStorage {
 	public void addFile(String path, String hash) {
 		fileMap.put(path, hash);
 	}
+        
+        public HashMap<String, String> getMap(){
+            return fileMap;
+        }
+        
+        @Override
+        public String toString(){
+            String s = "";
+            List<Pair<String, String>> files = getAllFiles();
+            
+            for(Pair<String, String> file : files){
+                s += file.toString() + " ";
+            }
+            
+            return s;
+        }
 	
 }
