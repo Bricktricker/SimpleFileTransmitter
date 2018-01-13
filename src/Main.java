@@ -1,11 +1,11 @@
-import java.util.List;
 
-import FileSystem.FileInfo;
 import FileSystem.FileStorage;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import networking.Client;
+import networking.Packet;
+import networking.PacketTypes;
 import networking.Server;
 
 public class Main {
@@ -23,35 +23,48 @@ public class Main {
                 }
                 */
                 
-		/*
+		
             try {
                 Server server = new Server(8080);
                 server.waitForUser();
                 
                 while(server.isConnected()){
-                    Object o = server.getDataBlocking();
-                    if(o != null){
-                        System.out.println((String)o);
-                    }else{
-                       // System.out.println("no data");
+                    Packet pack = (Packet) server.getData();
+                    if(pack == null){
+                        continue;
                     }
+                    
+                    PacketTypes type = pack.getType();
+                    switch (type) {
+                        case CONNECT:
+                            Packet p = new Packet(PacketTypes.CONNECTED);
+                            server.sendData(p);
+                        default:
+                            System.err.println("Type not found");
+                            continue;
+                    }
+                    
+                    
                 }
-                
-                
+                server.stopServer();
             } catch (IOException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-            */
-                
+            
+              
             try {
                 Client client = new Client("192.168.178.44", 8080);
-                client.sendData("Hello World");
-                Thread.sleep(5000);
-                client.sendData("from here");
+                Packet pack = new Packet(PacketTypes.CONNECT);
+                client.sendData(pack);
+                
+                Packet ret = client.readData();
+                System.out.println(ret.getType());
+                
                 client.disconnect();
-            } catch (IOException | InterruptedException ex) {
+            } catch (IOException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
+            
             
             try {
 		Thread.sleep(2000);

@@ -31,6 +31,25 @@ public class Server {
         socket = new ServerSocket(port);
     }
     
+    public void disconnect(){
+        try {
+            outStream.close();
+            inStream.close();
+            userSocket.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void stopServer(){
+        disconnect();
+        try {
+            socket.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     public void waitForUser() throws IOException{
         userSocket = socket.accept();
         System.out.println("use connected: " + userSocket.toString());
@@ -38,16 +57,21 @@ public class Server {
         inStream = new ObjectInputStream(userSocket.getInputStream());
     }
     
-    public void sendData(Object data) throws IOException{
+    public void sendData(Packet data) throws IOException{
         outStream.writeObject(data);
         outStream.flush();
     }
     
-    public Object getDataBlocking(){
+    public Packet getData(){
         try {
-            return inStream.readObject();
-        } catch (IOException | ClassNotFoundException ex) {
-            //Logger.getLogger(Server.class.getName()).log(Level.WARNING, null, ex);
+            Object o = inStream.readObject();
+            if(o instanceof Packet){
+                return (Packet)o;
+            }
+        } catch (IOException ex) {
+            disconnect();
+        }catch (ClassNotFoundException ex){
+            Logger.getLogger(Server.class.getName()).log(Level.WARNING, null, ex);
         }
         return null;
     }

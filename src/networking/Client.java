@@ -38,15 +38,17 @@ public class Client {
         }
     }
     
-    public void sendData(Object o) throws IOException{
+    public void sendData(Packet o) throws IOException{
         outStream.writeObject(o);
         outStream.flush();
     }
     
-    public Object readData(){
+    public Packet readData(){
         try {
-            
-            return inStream.readObject();
+            Object o = inStream.readObject();
+            if(o instanceof Packet){
+                return (Packet)o;
+            }
         } catch (IOException | ClassNotFoundException ex) {
             //Logger.getLogger(Server.class.getName()).log(Level.WARNING, null, ex);
         }
