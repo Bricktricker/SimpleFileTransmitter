@@ -14,7 +14,8 @@ import java.util.ArrayList;
  */
 public class Packet extends ArrayList<Object> implements Serializable{
     
-    PacketTypes type;
+	private static final long serialVersionUID = -16433753027183015L;
+	private PacketTypes type;
     
     public Packet(PacketTypes type, Object... o){
         this.type = type;
