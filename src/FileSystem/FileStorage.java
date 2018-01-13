@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 public class FileStorage implements Serializable{
 	
 	private static final long serialVersionUID = 3258695147163353327L;
-	private final Path folder; //Project directory
+	private transient final Path folder; //Project directory
 	private HashMap<String, String> fileMap; //Map wit path, hash
 	
 	public FileStorage(String folder){
