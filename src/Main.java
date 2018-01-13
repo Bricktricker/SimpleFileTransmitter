@@ -2,13 +2,8 @@
 import FileSystem.FileManager;
 import FileSystem.FileStorage;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import networking.Client;
-import networking.Packet;
-import networking.PacketTypes;
-import networking.Server;
 
 public class Main {
 
@@ -46,6 +41,6 @@ public class Main {
             }
                
 		
-		System.out.println("finished");
+            System.out.println("finished");
 	}
 }

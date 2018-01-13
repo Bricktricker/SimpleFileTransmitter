@@ -18,8 +18,10 @@ import networking.Server;
  */
 public class SeverHandler {
     
+    public static int port = 8080;
+    
     public static void handleServer(FileStorage storage) throws IOException{
-        Server server = new Server(8080);
+        Server server = new Server(port);
                 server.waitForUser();
                 
                 while(server.isConnected()){
@@ -46,6 +48,10 @@ public class SeverHandler {
                             String path = (String) pack.get(0);
                             byte[] fileData = (byte[]) pack.get(1);
                             FileManager.writeFile(path, fileData);
+                            
+                            Packet recvPack = new Packet(PacketTypes.FILE_RECEIVED, path);
+                            server.sendData(recvPack);
+                            
                             storage.update();
                             break;
                         case KEEP_ALIVE:

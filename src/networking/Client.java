@@ -18,9 +18,9 @@ import java.util.logging.Logger;
  */
 public class Client {
     
-    private Socket socket;
-    private ObjectOutputStream outStream;
-    private ObjectInputStream inStream;
+    private final Socket socket;
+    private final ObjectOutputStream outStream;
+    private final ObjectInputStream inStream;
     
     public Client(String host, int port) throws IOException{
         socket = new Socket(host, port);
@@ -53,6 +53,10 @@ public class Client {
             //Logger.getLogger(Server.class.getName()).log(Level.WARNING, null, ex);
         }
         return null;
+    }
+    
+    public boolean isConnected(){
+        return !socket.isClosed();
     }
     
 }

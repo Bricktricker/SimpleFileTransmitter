@@ -57,30 +57,30 @@ public class FileStorage implements Serializable{
 		File[] files = new File(path).listFiles();
 		
 		for(File f : files) {
-			if(f.isFile()) {
+                    if(f.isFile()) {
 				
-				try {
-					String hash = getHash(f);
-					String p = getRelPath(f.toPath());
-					String oldHash = fileMap.get(p);
+                            try {
+                                String hash = getHash(f);
+                                String p = getRelPath(f.toPath());
+                                String oldHash = fileMap.get(p);
 					
-					//File was added to project
-					if(oldHash == null) {
-						FileInfo info = new FileInfo(p, hash);
-						info.setAdded(true);
-						changeList.add(info);
+                                //File was added to project
+                                if(oldHash == null) {
+                                    FileInfo info = new FileInfo(p, hash);
+                                    info.setAdded(true);
+                                    changeList.add(info);
 						
-					//File got updated
-					}else if(!hash.equals(oldHash)) {
-						FileInfo info = new FileInfo(p, hash);
-						changeList.add(info);
-					}
+                                //File got updated
+                                }else if(!hash.equals(oldHash)) {
+                                    FileInfo info = new FileInfo(p, hash);
+                                    changeList.add(info);
+                                }
 					
-					//Add file to new FileStorage
-					newStorage.addFile(p, hash);
+                                //Add file to new FileStorage
+                                newStorage.addFile(p, hash);
 				
 				} catch (NoSuchAlgorithmException | IOException e) {
-					Logger.getLogger(FileStorage.class.getName()).log(Level.SEVERE, null, e);
+                                    Logger.getLogger(FileStorage.class.getName()).log(Level.SEVERE, null, e);
 				}
 			
 			//File is folder, add it recursively to List
