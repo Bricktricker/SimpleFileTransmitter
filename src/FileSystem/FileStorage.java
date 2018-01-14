@@ -31,7 +31,6 @@ public class FileStorage implements Serializable{
 	public FileStorage(String folder){
 		this.folder = Paths.get(folder);
 		fileMap = new HashMap<>();
-		System.out.println(folder);
 	}
 	
 	//Sets project directory to working directory
@@ -39,7 +38,6 @@ public class FileStorage implements Serializable{
 		Path currentRelativePath = Paths.get("");
 		folder = currentRelativePath.toAbsolutePath();
 		fileMap = new HashMap<>();
-		System.out.println(folder.toString());
 	}
 	
 	//updates fileMap and return List of changes

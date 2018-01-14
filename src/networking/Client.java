@@ -8,6 +8,7 @@ package networking;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,8 +23,9 @@ public class Client {
     private final ObjectOutputStream outStream;
     private final ObjectInputStream inStream;
     
-    public Client(String host, int port) throws IOException{
-        socket = new Socket(host, port);
+    public Client(String host, int port, int timeOut) throws IOException{
+        socket = new Socket();
+        socket.connect(new InetSocketAddress(host, port), timeOut);
         outStream = new ObjectOutputStream(socket.getOutputStream());
         inStream = new ObjectInputStream(socket.getInputStream());
     }

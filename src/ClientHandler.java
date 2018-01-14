@@ -17,8 +17,12 @@ import networking.PacketTypes;
  */
 public class ClientHandler {
     
+    public static int port = 8080;
+    public static String serverAddress = "";
+    public static int timeOut = 5000;
+    
     public static void handleClient(FileStorage storage) throws IOException{
-        Client client = new Client("192.168.178.44", 8080);
+        Client client = new Client(serverAddress, port, timeOut);
         Packet pack = new Packet(PacketTypes.GET_TREE);
         client.sendData(pack);
                 

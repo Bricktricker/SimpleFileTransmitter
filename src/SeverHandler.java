@@ -1,4 +1,5 @@
 
+import FileSystem.FileInfo;
 import FileSystem.FileManager;
 import FileSystem.FileStorage;
 import java.io.IOException;
@@ -45,13 +46,14 @@ public class SeverHandler {
                             server.sendData(treePack);
                             break;
                         case SEND_FILE:
-                            String path = (String) pack.get(0);
+                            FileInfo info = (FileInfo) pack.get(0);
                             byte[] fileData = (byte[]) pack.get(1);
-                            FileManager.writeFile(path, fileData);
+                            FileManager.handleFileInput(info, fileData);
                             
-                            Packet recvPack = new Packet(PacketTypes.FILE_RECEIVED, path);
+                            Packet recvPack = new Packet(PacketTypes.FILE_RECEIVED, info.getFilePath());
                             server.sendData(recvPack);
-                            
+                            break;
+                        case ALL_FILES_SEND:
                             storage.update();
                             break;
                         case KEEP_ALIVE:
