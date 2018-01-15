@@ -21,13 +21,13 @@ public class Server {
     
     private ServerSocket socket;
     private Socket userSocket;
-    private int port;
+    //private int port;
     
     private ObjectOutputStream outStream;
     private ObjectInputStream inStream;
     
     public Server(int port) throws IOException{
-        this.port = port;
+        //this.port = port;
         socket = new ServerSocket(port);
     }
     
