@@ -63,8 +63,7 @@ public class FileInfo implements Serializable {
             FileInfo other = (FileInfo) obj;
             boolean filePathDif = filePath.equals(other.filePath);
             boolean hashDif = fileHash.equals(other.fileHash);
-            boolean stats = added == other.added && removed == other.removed;
-            return filePathDif && hashDif && stats;
+            return filePathDif && hashDif;
         }
 
         @Override
@@ -75,6 +74,11 @@ public class FileInfo implements Serializable {
             hash = 41 * hash + (this.added ? 1 : 0);
             hash = 41 * hash + (this.removed ? 1 : 0);
             return hash;
+        }
+        
+        @Override
+        public String toString(){
+            return filePath + (added?" added":"") + (removed?" removed":"");
         }
 	
 }

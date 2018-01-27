@@ -1,6 +1,8 @@
 
 import FileSystem.FileInfo;
 import FileSystem.FileStorage;
+import Utils.Pair;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.SyncFailedException;
 import java.nio.file.*;
@@ -77,16 +79,30 @@ public class ClientHandler {
                     Path file = folder.resolve((Path) event.context());
                     String path = storage.getRelPath(file);
                     if(event.kind() == StandardWatchEventKinds.ENTRY_DELETE){
+                        Pair<String, String> fileData = storage.removeFromMap(file.toFile());
+                        FileInfo info = new FileInfo(fileData.getFirst(), fileData.getSecond());
+                        info.setRemoved(true);
+                        
+                        changes.add(info);
                         System.out.println(file + " deleted");
                     }else{
-                        storage.addFile(file.toFile());
-                        FileInfo info = new FileInfo(path, storage.getHash(path, false));
-                        changes.add(info);
+                        try{
+                            storage.addFile(file.toFile());
+                            FileInfo info = new FileInfo(path, storage.getHash(path, false));
+                            
+                            if(event.kind() == StandardWatchEventKinds.ENTRY_CREATE)
+                                info.setAdded(true);
+                            
+                            changes.add(info);
+                        }catch(FileNotFoundException e){}
                     }
                     
-                    System.out.println(file + " was last modified at " + file.toFile().lastModified());
+                    System.out.println(file + " generated event " + event.kind());
                 }
                 
+                for(FileInfo info : changes){
+                    System.out.println(info);
+                }
                 
                 if(!isRunning){
                     throw new IOException("just for testing");

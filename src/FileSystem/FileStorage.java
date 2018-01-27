@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import Utils.Pair;
+import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -105,7 +106,6 @@ public class FileStorage implements Serializable{
         //loads current folder status and saves it in fileMap
 	public void updateStorage() {
 		updateStorageRecursive(folder.toString());
-		System.out.println("filled Map");
 	}
 	
 	//fills fileMap with pathes and hash values
@@ -114,7 +114,12 @@ public class FileStorage implements Serializable{
 		
 		for(File f : files) {
 			if(f.isFile()) {
-				addFileToMap(f);
+                                try{
+                                    addFileToMap(f);
+                                }catch(FileNotFoundException e){
+                                    
+                                }
+				
 			}else {
 				updateStorageRecursive(f.getAbsolutePath());
 			}
@@ -127,24 +132,29 @@ public class FileStorage implements Serializable{
 	}
 	
 	//add File to fileMap
-	private void addFileToMap(File file) {
+	private void addFileToMap(File file) throws FileNotFoundException {
 		try {
 			String hash = getHash(file);
 			String p = getRelPath(file.toPath());
 			//System.out.println(p);
 			fileMap.put(p, hash);
 		} catch (NoSuchAlgorithmException | IOException e) {
-			e.printStackTrace();
+                    if(e instanceof FileNotFoundException){
+                        throw new FileNotFoundException(e.getMessage());
+                    }
+                    e.printStackTrace();
 		}
 	}
         
-        public void removeFromMap(File file){
-            String p = getRelPath(file.toPath());
-            fileMap.remove(p);
+        public Pair<String, String> removeFromMap(File file){
+            String path = getRelPath(file.toPath());
+            String hash = fileMap.get(path);
+            fileMap.remove(path);
+            return new Pair<>(path, hash);
         }
 	
 	//generate hash from file
-	private String getHash(final File file) throws NoSuchAlgorithmException, IOException  {
+	private String getHash(final File file) throws NoSuchAlgorithmException, IOException, FileNotFoundException  {
 	    final MessageDigest messageDigest = MessageDigest.getInstance("MD5");
 
 	    try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
@@ -191,7 +201,7 @@ public class FileStorage implements Serializable{
 		fileMap.put(path, hash);
 	}
         
-        public void addFile(File file){
+        public void addFile(File file) throws FileNotFoundException{
             addFileToMap(file);
         }
         
