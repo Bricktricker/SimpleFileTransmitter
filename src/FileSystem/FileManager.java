@@ -29,7 +29,7 @@ public class FileManager {
         public static void handleFileInput(FileInfo info, byte[] fileData){
             if(info.isRemoved()){
                 try {
-                    Files.delete(Paths.get(workingDir + info.getFilePath()));
+                    Files.delete(Paths.get(workingDir + "/" + info.getFilePath()));
                 } catch (NoSuchFileException ex) {
                     System.err.format("%s: no such" + " file or directory%n", workingDir + info.getFilePath());
                 } catch (DirectoryNotEmptyException ex) {

@@ -32,6 +32,7 @@ public class ClientHandler {
         try{
             //Connect
             client = new Client(serverAddress, port, timeOut);
+            System.out.println("client created");
             Packet pack = new Packet(PacketTypes.CONNECT);
             client.sendData(pack);       
             Packet ret = client.readData();
@@ -39,11 +40,15 @@ public class ClientHandler {
                 throw new SyncFailedException("Server answerd not properly");
             }
             
+            System.out.println("initial update start");
+            
             //Inital update
             Packet treePack = new Packet(PacketTypes.GET_TREE);
             client.sendData(treePack);
             Packet retPack = client.readData();
+            
             FileStorage serverStorage = (FileStorage) retPack.get(0);
+            serverStorage.setFolder(storage.getFolder());
             List<FileInfo> changes = serverStorage.update();
             updateServer(client, changes, storage);
                 
@@ -56,6 +61,7 @@ public class ClientHandler {
             System.exit(1);
         }
         
+        System.out.println("initial ready");
         
         try{
         boolean isRunning = true;
@@ -95,7 +101,8 @@ public class ClientHandler {
                 if(e.getCause() != null)
                     System.err.println(e.getCause().toString());
             }
-            Thread.sleep(60000);
+            Thread.sleep(15000);
+            System.out.println("re-check");
         }
         
         }catch (InterruptedException ex) {
@@ -113,11 +120,14 @@ public class ClientHandler {
     
     public static void updateServer(Client client, List<FileInfo> changes, FileStorage storage) throws IOException{
         for(FileInfo info : changes){
+            try{
+                
+            
             if(info.isRemoved()){
                 Packet pack = new Packet(PacketTypes.SEND_FILE, info, (Object)null);
                 client.sendData(pack);
             }else{
-                Path path = Paths.get(info.getFilePath());
+                Path path = Paths.get(storage.getFolder().toString() + "/" + info.getFilePath());
                 byte[] data = Files.readAllBytes(path);
                 
                 Packet pack = new Packet(PacketTypes.SEND_FILE, info, data);
@@ -129,6 +139,11 @@ public class ClientHandler {
                 if(!gotPath.equals(info.getFilePath())){
                     System.err.println("Error sending file");
                 }
+            }
+            
+            }catch(NoSuchFileException e){
+                System.err.println("File " + info.getFilePath() + " not found");
+                e.printStackTrace();
             }
         }
         
