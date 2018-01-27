@@ -22,7 +22,7 @@ public class FileManager {
 			storage = new FileStorage(workingDir);
 		}
 		
-		storage.fillMap();
+		storage.updateStorage();
 		return storage;
 	}
         
@@ -45,7 +45,7 @@ public class FileManager {
         
         private static void writeFile(String path, byte[] fileData){
             try {
-                FileOutputStream fos = new FileOutputStream(workingDir + path);
+                FileOutputStream fos = new FileOutputStream(workingDir + "/" + path);
                 fos.write(fileData);
                 fos.flush();
                 fos.close();

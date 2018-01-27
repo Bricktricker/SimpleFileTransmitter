@@ -41,7 +41,7 @@ public class SeverHandler {
                             System.err.println("Got packet of type CONNECTED, should not happen!");
                             break;
                         case GET_TREE:
-                            storage.update();
+                            storage.getChanges();
                             Packet treePack = new Packet(PacketTypes.SEND_TREE, storage);
                             server.sendData(treePack);
                             break;
@@ -54,7 +54,7 @@ public class SeverHandler {
                             server.sendData(recvPack);
                             break;
                         case ALL_FILES_SEND:
-                            storage.update();
+                            storage.getChanges();
                             break;
                         case KEEP_ALIVE:
                             break;

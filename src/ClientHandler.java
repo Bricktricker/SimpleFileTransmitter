@@ -4,7 +4,9 @@ import FileSystem.FileStorage;
 import java.io.IOException;
 import java.io.SyncFailedException;
 import java.nio.file.*;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import networking.Client;
 import networking.Packet;
 import networking.PacketTypes;
@@ -49,7 +51,7 @@ public class ClientHandler {
             
             FileStorage serverStorage = (FileStorage) retPack.get(0);
             serverStorage.setFolder(storage.getFolder());
-            List<FileInfo> changes = serverStorage.update();
+            List<FileInfo> changes = serverStorage.getChanges();
             updateServer(client, changes, storage);
                 
         }catch(IOException e){
@@ -70,22 +72,35 @@ public class ClientHandler {
         WatchKey watchKey = folder.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
         while(isRunning){
             try{
+                Set<FileInfo> changes = new HashSet<>();
                 for (WatchEvent<?> event : watchKey.pollEvents()) {
-                    System.out.println(event.kind());
                     Path file = folder.resolve((Path) event.context());
+                    String path = storage.getRelPath(file);
+                    if(event.kind() == StandardWatchEventKinds.ENTRY_DELETE){
+                        System.out.println(file + " deleted");
+                    }else{
+                        storage.addFile(file.toFile());
+                        FileInfo info = new FileInfo(path, storage.getHash(path, false));
+                        changes.add(info);
+                    }
+                    
                     System.out.println(file + " was last modified at " + file.toFile().lastModified());
                 }
                 
                 
-                
+                if(!isRunning){
+                    throw new IOException("just for testing");
+                }
                 
                 //Update the Server Files
+                /*
                 Packet pack = new Packet(PacketTypes.GET_TREE);
                 client.sendData(pack);
                 Packet retPack = client.readData();
                 FileStorage serverStorage = (FileStorage) retPack.get(0);
-                List<FileInfo> changes = serverStorage.update();
+                List<FileInfo> changes = serverStorage.getChanges();
                 updateServer(client, changes, storage);
+                */
                 
                 /*
                 try {

@@ -1,6 +1,7 @@
 package FileSystem;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class FileInfo implements Serializable {
 
@@ -50,5 +51,30 @@ public class FileInfo implements Serializable {
 		this.removed = removed;
 	}
 	
+        @Override
+        public boolean equals( Object obj ){
+            if(obj == null)
+                return false;
+            if(obj == this)
+                return true;
+            if (! obj.getClass().equals(getClass()))
+                return false;
+            
+            FileInfo other = (FileInfo) obj;
+            boolean filePathDif = filePath.equals(other.filePath);
+            boolean hashDif = fileHash.equals(other.fileHash);
+            boolean stats = added == other.added && removed == other.removed;
+            return filePathDif && hashDif && stats;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 5;
+            hash = 41 * hash + Objects.hashCode(this.filePath);
+            hash = 41 * hash + Objects.hashCode(this.fileHash);
+            hash = 41 * hash + (this.added ? 1 : 0);
+            hash = 41 * hash + (this.removed ? 1 : 0);
+            return hash;
+        }
 	
 }

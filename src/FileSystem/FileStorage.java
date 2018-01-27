@@ -26,7 +26,7 @@ public class FileStorage implements Serializable{
 	
 	private static final long serialVersionUID = 3258695147163353327L;
 	private transient Path folder; //Project directory
-	private HashMap<String, String> fileMap; //Map wit path, hash
+	private HashMap<String, String> fileMap; //Map with path, hash
 	
 	public FileStorage(String folder){
 		this.folder = Paths.get(folder);
@@ -41,17 +41,17 @@ public class FileStorage implements Serializable{
 	}
 	
 	//updates fileMap and return List of changes
-	public List<FileInfo> update(){
+	public List<FileInfo> getChanges(){
 		List<FileInfo> changes = new LinkedList<>();
 		FileStorage newStorage = new FileStorage(folder.toString());
-		update(changes, folder.toString(), newStorage);
+		getChangesRecursive(changes, folder.toString(), newStorage);
 		
 		addDeletedFiles(changes, newStorage);
 		fileMap = newStorage.fileMap;
 		return changes;
 	}
 	
-	private void update(List<FileInfo> changeList, String path, FileStorage newStorage) {
+	private void getChangesRecursive(List<FileInfo> changeList, String path, FileStorage newStorage) {
 		File[] files = new File(path).listFiles();
 		
 		for(File f : files) {
@@ -83,12 +83,12 @@ public class FileStorage implements Serializable{
 			
 			//File is folder, add it recursively to List
 			}else {
-				update(changeList, f.getAbsolutePath(), newStorage);
+				getChangesRecursive(changeList, f.getAbsolutePath(), newStorage);
 			}
 		}
 	}
 	
-	//Searches for files with got deleted
+	//Searches for files which got deleted
 	private void addDeletedFiles(List<FileInfo> changeList, FileStorage newState) {
 		Set<String> oldSet = fileMap.keySet();
 		Set<String> newSet = newState.fileMap.keySet();
@@ -102,31 +102,32 @@ public class FileStorage implements Serializable{
 		}
 	}
 	
-	public void fillMap() {
-		fillMap(folder.toString());
+        //loads current folder status and saves it in fileMap
+	public void updateStorage() {
+		updateStorageRecursive(folder.toString());
 		System.out.println("filled Map");
 	}
 	
 	//fills fileMap with pathes and hash values
-	private void fillMap(String path) {
+	private void updateStorageRecursive(String path) {
 		File[] files = new File(path).listFiles();
 		
 		for(File f : files) {
 			if(f.isFile()) {
-				addToMap(f);
+				addFileToMap(f);
 			}else {
-				fillMap(f.getAbsolutePath());
+				updateStorageRecursive(f.getAbsolutePath());
 			}
 		}
 	}
 	
 	//get Path of the File relative to the project folder
-	private String getRelPath(Path filePath) {
+	public String getRelPath(Path filePath) {
 		return folder.relativize(filePath).toString();
 	}
 	
 	//add File to fileMap
-	private void addToMap(File file) {
+	private void addFileToMap(File file) {
 		try {
 			String hash = getHash(file);
 			String p = getRelPath(file.toPath());
@@ -136,6 +137,11 @@ public class FileStorage implements Serializable{
 			e.printStackTrace();
 		}
 	}
+        
+        public void removeFromMap(File file){
+            String p = getRelPath(file.toPath());
+            fileMap.remove(p);
+        }
 	
 	//generate hash from file
 	private String getHash(final File file) throws NoSuchAlgorithmException, IOException  {
@@ -170,7 +176,7 @@ public class FileStorage implements Serializable{
 		return list;
 	}
 	
-	//Get a hash from a filePath (if path is stord i fileMap)
+	//Get a hash from a filePath (if path is stored fileMap)
 	public String getHash(String path, boolean isAbsolute) {
 		if(isAbsolute) {
 			String relPath = getRelPath(Paths.get(path));
@@ -184,6 +190,10 @@ public class FileStorage implements Serializable{
 	public void addFile(String path, String hash) {
 		fileMap.put(path, hash);
 	}
+        
+        public void addFile(File file){
+            addFileToMap(file);
+        }
         
         public HashMap<String, String> getMap(){
             return fileMap;

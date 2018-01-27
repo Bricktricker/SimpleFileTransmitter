@@ -12,7 +12,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.IIOException;
 
 /**
  *
@@ -46,7 +45,7 @@ public class Client implements java.io.Closeable{
             outStream.writeObject(o);
             outStream.flush(); 
         }catch(IOException e){
-            throw new IIOException("Error sending Packet");
+            throw new IOException("Error sending Packet");
         }
         
     }
