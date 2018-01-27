@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  *
  * @author Philipp
  */
-public class Client {
+public class Client implements java.io.Closeable{
     
     private final Socket socket;
     private final ObjectOutputStream outStream;
@@ -59,6 +59,13 @@ public class Client {
     
     public boolean isConnected(){
         return !socket.isClosed();
+    }
+
+    @Override
+    public void close() throws IOException {
+        outStream.close();
+        inStream.close();
+        socket.close();
     }
     
 }

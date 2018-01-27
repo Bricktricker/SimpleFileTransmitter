@@ -4,8 +4,6 @@ import FileSystem.FileStorage;
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Main {
     
@@ -73,7 +71,7 @@ public class Main {
             } catch (IOException ex) {
                 //Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                 ex.printStackTrace();
-                ClientHandler.client.disconnect();
+                //ClientHandler.client.disconnect();
             }
  	
 	}

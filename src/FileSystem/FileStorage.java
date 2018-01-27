@@ -200,5 +200,9 @@ public class FileStorage implements Serializable{
             
             return s;
         }
+        
+        public Path getFolder(){
+            return folder;
+        }
 	
 }
