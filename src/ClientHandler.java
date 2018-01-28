@@ -1,6 +1,23 @@
+/*
+ * Copyright 2018 Philipp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 import FileSystem.FileInfo;
+import FileSystem.FileManager;
 import FileSystem.FileStorage;
+import FileSystem.FolderWatcher;
 import Utils.Pair;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,12 +29,6 @@ import java.util.Set;
 import networking.Client;
 import networking.Packet;
 import networking.PacketTypes;
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
  *
@@ -36,15 +47,12 @@ public class ClientHandler {
         try{
             //Connect
             client = new Client(serverAddress, port, timeOut);
-            System.out.println("client created");
             Packet pack = new Packet(PacketTypes.CONNECT);
             client.sendData(pack);       
             Packet ret = client.readData();
             if(ret.getType() != PacketTypes.CONNECTED){
                 throw new SyncFailedException("Server answerd not properly");
             }
-            
-            System.out.println("initial update start");
             
             //Inital update
             Packet treePack = new Packet(PacketTypes.GET_TREE);
@@ -69,13 +77,15 @@ public class ClientHandler {
         
         try{
         boolean isRunning = true;
-        WatchService watchService = FileSystems.getDefault().newWatchService();
         Path folder = storage.getFolder();
-        WatchKey watchKey = folder.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
+        FolderWatcher folderWatcher = new FolderWatcher(folder);
+        
+        
         while(isRunning){
             try{
-                Set<FileInfo> changes = new HashSet<>();
-                for (WatchEvent<?> event : watchKey.pollEvents()) {
+                FileStorage changes = FileManager.createEmptyStorage();
+                
+                for (WatchEvent<?> event : folderWatcher.getEvents()) {
                     Path file = folder.resolve((Path) event.context());
                     String path = storage.getRelPath(file);
                     if(event.kind() == StandardWatchEventKinds.ENTRY_DELETE){
@@ -158,7 +168,7 @@ public class ClientHandler {
                 Packet pack = new Packet(PacketTypes.SEND_FILE, info, (Object)null);
                 client.sendData(pack);
             }else{
-                Path path = Paths.get(storage.getFolder().toString() + "/" + info.getFilePath());
+                Path path = Paths.get(storage.getFolder().toString() + "/" + info.getPath());
                 byte[] data = Files.readAllBytes(path);
                 
                 Packet pack = new Packet(PacketTypes.SEND_FILE, info, data);
@@ -167,13 +177,13 @@ public class ClientHandler {
             Packet retPack = client.readData();
             if(retPack.getType() == PacketTypes.FILE_RECEIVED){
                 String gotPath = (String) retPack.get(0);
-                if(!gotPath.equals(info.getFilePath())){
+                if(!gotPath.equals(info.getPath())){
                     System.err.println("Error sending file");
                 }
             }
             
             }catch(NoSuchFileException e){
-                System.err.println("File " + info.getFilePath() + " not found");
+                System.err.println("File " + info.getPath() + " not found");
                 e.printStackTrace();
             }
         }

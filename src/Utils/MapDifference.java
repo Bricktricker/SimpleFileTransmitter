@@ -13,12 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package networking;
+package Utils;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  *
  * @author Philipp
  */
-public enum PacketTypes {
-    CONNECT, CONNECTED, GET_TREE, SEND_TREE, CREATE_FOLDER, SEND_FILE, FILE_RECEIVED, ALL_FILES_SEND, KEEP_ALIVE
+public class MapDifference {
+    
+    public static <K, V> Set<Entry<K, V>> mapDifference(Map<K,V> left, Map<K,V> right) {
+        Set<Entry<K, V>> diff12 = new HashSet<>(left.entrySet());
+        Set<Entry<K, V>> diff21 = new HashSet<>(right.entrySet());
+        
+        diff12.removeAll(right.entrySet());
+        diff21.removeAll(left.entrySet());
+        diff12.addAll(diff21);
+        return diff12;
+    }
+
 }

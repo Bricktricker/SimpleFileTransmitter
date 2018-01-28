@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018 Philipp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package FileSystem;
 
 import java.io.BufferedInputStream;
@@ -59,7 +74,7 @@ public class FileStorage implements Serializable{
                     if(f.isFile()) {
 				
                             try {
-                                String hash = getHash(f);
+                                String hash = FileManager.getHash(f);
                                 String p = getRelPath(f.toPath());
                                 String oldHash = fileMap.get(p);
 					
@@ -78,7 +93,7 @@ public class FileStorage implements Serializable{
                                 //Add file to new FileStorage
                                 newStorage.addFile(p, hash);
 				
-				} catch (NoSuchAlgorithmException | IOException e) {
+				} catch (IOException e) {
                                     Logger.getLogger(FileStorage.class.getName()).log(Level.SEVERE, null, e);
 				}
 			
@@ -134,11 +149,11 @@ public class FileStorage implements Serializable{
 	//add File to fileMap
 	private void addFileToMap(File file) throws FileNotFoundException {
 		try {
-			String hash = getHash(file);
+			String hash = FileManager.getHash(file);
 			String p = getRelPath(file.toPath());
 			//System.out.println(p);
 			fileMap.put(p, hash);
-		} catch (NoSuchAlgorithmException | IOException e) {
+		} catch (IOException e) {
                     if(e instanceof FileNotFoundException){
                         throw new FileNotFoundException(e.getMessage());
                     }
@@ -152,26 +167,6 @@ public class FileStorage implements Serializable{
             fileMap.remove(path);
             return new Pair<>(path, hash);
         }
-	
-	//generate hash from file
-	private String getHash(final File file) throws NoSuchAlgorithmException, IOException, FileNotFoundException  {
-	    final MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-
-	    try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
-	      final byte[] buffer = new byte[1024];
-	      for (int read = 0; (read = is.read(buffer)) != -1;) {
-	        messageDigest.update(buffer, 0, read);
-	      }
-	    }
-
-	    // Convert the byte to hex format
-	    try (Formatter formatter = new Formatter()) {
-	      for (final byte b : messageDigest.digest()) {
-	        formatter.format("%02x", b);
-	      }
-	      return formatter.toString();
-	    }
-	}
 	
 	//return a List of all files in the fileMap
 	public List<Pair<String, String>> getAllFiles(){
@@ -227,6 +222,10 @@ public class FileStorage implements Serializable{
         
         public void setFolder(Path path){
             this.folder = path;
+        }
+        
+        public void clear(){
+            fileMap.clear();
         }
 	
 }

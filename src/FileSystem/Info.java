@@ -13,12 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package networking;
+package FileSystem;
 
 /**
  *
  * @author Philipp
  */
-public enum PacketTypes {
-    CONNECT, CONNECTED, GET_TREE, SEND_TREE, CREATE_FOLDER, SEND_FILE, FILE_RECEIVED, ALL_FILES_SEND, KEEP_ALIVE
+public abstract class Info {
+    
+    public abstract String getPath();
+    
+    public abstract void setPath(String path);
+    
+    public abstract boolean isAdded();
+
+    public abstract void setAdded(boolean added);
+
+    public abstract boolean isRemoved();
+
+    public abstract void setRemoved(boolean removed);
+    
 }

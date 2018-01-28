@@ -50,7 +50,7 @@ public class SeverHandler {
                             byte[] fileData = (byte[]) pack.get(1);
                             FileManager.handleFileInput(info, fileData);
                             
-                            Packet recvPack = new Packet(PacketTypes.FILE_RECEIVED, info.getFilePath());
+                            Packet recvPack = new Packet(PacketTypes.FILE_RECEIVED, info.getPath());
                             server.sendData(recvPack);
                             break;
                         case ALL_FILES_SEND:
