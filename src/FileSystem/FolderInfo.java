@@ -24,7 +24,9 @@ import java.util.Objects;
  */
 public class FolderInfo extends Info implements Serializable{
     
-    private String path;
+	private static final long serialVersionUID = 69878761527707186L;
+	
+	private String path;
     private String oldPath;
     private boolean added;
     private boolean removed;

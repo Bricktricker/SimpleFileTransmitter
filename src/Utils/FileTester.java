@@ -39,7 +39,7 @@ public class FileTester {
     
     public static void main(String[] args) throws IOException{
         FileManager.workingDir = "D:\\Eigene Dateien\\Bilder\\";        
-        //Ãœbergeben an Funktion
+        //Übergeben an Funktion
         FileStorage storage = FileManager.createFileStorage();
         
         //Vor der loop
@@ -59,7 +59,7 @@ public class FileTester {
                     continue;
                 }
                 
-                WatchEvent<Path> ev = folderWatcher.cast(event);
+                WatchEvent<Path> ev = FolderWatcher.cast(event);
                 Path name = ev.context();
                 Path filename = dir.resolve(name);
                 
@@ -112,7 +112,7 @@ public class FileTester {
             
             //UPLOAD FILES
             if(fileChanges.size() > 0 || folderChanges.size() > 0){
-                int i =0;
+                
             }
         }
     }
