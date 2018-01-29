@@ -37,7 +37,7 @@ import java.nio.file.WatchKey;
  */
 public class FileTester {
     
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args){
         FileManager.workingDir = "D:\\Eigene Dateien\\Bilder\\";        
         //Übergeben an Funktion
         FileStorage storage = FileManager.createFileStorage();

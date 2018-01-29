@@ -16,6 +16,7 @@
 package FileSystem;
 
 import java.io.IOException;
+import java.nio.file.FileSystemException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -47,17 +48,20 @@ public class FolderWatcher {
         return (WatchEvent<T>)event;
     }
     
-    public FolderWatcher(Path dir) throws IOException{
-        this.watcher = FileSystems.getDefault().newWatchService();
-        this.keys = new HashMap<>();
+    public FolderWatcher(Path dir) throws FileSystemException{
+        try{
+            this.watcher = FileSystems.getDefault().newWatchService();
+            this.keys = new HashMap<>();
 
-        System.out.format("Scanning %s ...\n", dir);
-        registerAll(dir, null);
-        System.out.println("Done.");
+            System.out.format("Scanning %s ...\n", dir);
+            registerAll(dir, null);
+            System.out.println("Done.");
 
-
-        // enable trace after initial registration
-        this.trace = true;
+            // enable trace after initial registration
+            this.trace = true;
+        }catch(IOException e){
+            throw new FileSystemException(null);
+        }
     }
     
     public WatchKey getEvents(){
@@ -72,17 +76,22 @@ public class FolderWatcher {
         return keys.get(key);
     }
     
-    public void registerAll(final Path start, BiConsumer<Path, Path> renameCallback) throws IOException {
-        // register directory and sub-directories
-        Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-                throws IOException
-            {
-                register(dir, renameCallback);
-                return FileVisitResult.CONTINUE;
-            }
-        });
+    public void registerAll(final Path start, BiConsumer<Path, Path> renameCallback) throws FileSystemException {
+        try{
+            // register directory and sub-directories
+            Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+                    throws IOException
+                {
+                    register(dir, renameCallback);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        }catch(IOException e){
+            throw new FileSystemException(null);
+        }
+        
     }
     
     private void register(Path dir, BiConsumer<Path, Path> renameCallback) throws IOException {

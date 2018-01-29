@@ -18,11 +18,11 @@ package FileSystem;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
@@ -89,7 +89,7 @@ public class FileManager {
         }
         
         //generate hash from file
-	public static String getHash(final File file) throws IOException, FileNotFoundException  {
+	public static String getHash(final File file) throws FileSystemException {
 	    try{
                 
             final MessageDigest messageDigest = MessageDigest.getInstance("MD5");
@@ -99,7 +99,9 @@ public class FileManager {
 	      for (int read = 0; (read = is.read(buffer)) != -1;) {
 	        messageDigest.update(buffer, 0, read);
 	      }
-	    }
+	    }catch(IOException e){
+                throw new FileSystemException(null);
+            }
 
 	    // Convert the byte to hex format
 	    try (Formatter formatter = new Formatter()) {

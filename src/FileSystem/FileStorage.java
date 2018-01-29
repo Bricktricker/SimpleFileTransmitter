@@ -25,10 +25,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import Utils.Pair;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
+import java.nio.file.FileSystemException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -122,16 +122,15 @@ public class FileStorage implements Serializable{
 		File[] files = new File(path).listFiles();
 		
 		for(File f : files) {
-			if(f.isFile()) {
-                                try{
-                                    addFileToMap(f);
-                                }catch(FileNotFoundException e){
-                                    
-                                }
-				
-			}else {
-				updateStorageRecursive(f.getAbsolutePath());
-			}
+                    if(f.isFile()) {
+                        try{
+                            addFileToMap(f);
+                        }catch(FileSystemException e){
+                            System.err.println("Error while reading " + e.getFile());
+                        }
+                    }else {
+                        updateStorageRecursive(f.getAbsolutePath());
+                    }
 		}
 	}
 	
@@ -141,17 +140,13 @@ public class FileStorage implements Serializable{
 	}
 	
 	//add File to fileMap
-	private void addFileToMap(File file) throws FileNotFoundException {
+	private void addFileToMap(File file) throws FileSystemException {
 		try {
 			String hash = FileManager.getHash(file);
 			String p = getRelPath(file.toPath());
-			//System.out.println(p);
 			fileMap.put(p, hash);
 		} catch (IOException e) {
-                    if(e instanceof FileNotFoundException){
-                        throw new FileNotFoundException(e.getMessage());
-                    }
-                    e.printStackTrace();
+                    throw new FileSystemException(file.toString());
 		}
 	}
         
@@ -190,7 +185,7 @@ public class FileStorage implements Serializable{
 		fileMap.put(path, hash);
 	}
         
-        public void addFile(File file) throws FileNotFoundException{
+        public void addFile(File file) throws FileSystemException{
             addFileToMap(file);
         }
         

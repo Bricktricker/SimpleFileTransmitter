@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
+import FileSystem.ChangeList;
 import FileSystem.FileInfo;
 import FileSystem.FileManager;
 import FileSystem.FileStorage;
+import FileSystem.FolderInfo;
 import FileSystem.FolderWatcher;
-import Utils.Pair;
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.IOException;
 import java.io.SyncFailedException;
 import java.nio.file.*;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
+import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 import java.util.List;
 import networking.Client;
 import networking.Packet;
@@ -81,69 +86,78 @@ public class ClientHandler {
         
         while(isRunning){
             try{
-                FileStorage changes = FileManager.createEmptyStorage();
                 
-                for (WatchEvent<?> event : folderWatcher.getEvents()) {
-                    Path file = folder.resolve((Path) event.context());
-                    String path = storage.getRelPath(file);
-                    if(event.kind() == StandardWatchEventKinds.ENTRY_DELETE){
-                        Pair<String, String> fileData = storage.removeFromMap(file.toFile());
-                        FileInfo info = new FileInfo(fileData.getFirst(), fileData.getSecond());
-                        info.setRemoved(true);
-                        
-                        changes.add(info);
-                        System.out.println(file + " deleted");
-                    }else{
-                        try{
-                            storage.addFile(file.toFile());
-                            FileInfo info = new FileInfo(path, storage.getHash(path, false));
-                            
-                            if(event.kind() == StandardWatchEventKinds.ENTRY_CREATE)
-                                info.setAdded(true);
-                            
-                            changes.add(info);
-                        }catch(FileNotFoundException e){}
+                ChangeList<FileInfo> fileChanges = new ChangeList<>();
+                ChangeList<FolderInfo> folderChanges = new ChangeList<>();
+                WatchKey key = folderWatcher.getEvents();
+                Path dir = folderWatcher.getPath(key);
+
+                for (WatchEvent<?> event : key.pollEvents()) {
+                    WatchEvent.Kind<?> kind = event.kind();
+
+                    if(kind == OVERFLOW){
+                        System.err.println("OVERFLOW");
+                        continue;
                     }
-                    
-                    System.out.println(file + " generated event " + event.kind());
+
+                    WatchEvent<Path> ev = FolderWatcher.cast(event);
+                    Path name = ev.context();
+                    Path filename = dir.resolve(name);
+
+                    if(kind == ENTRY_CREATE){
+                        if (Files.isDirectory(filename, NOFOLLOW_LINKS)) {
+                                folderWatcher.registerAll(filename, (oldPath, NewPath)->{
+                                    FolderInfo info = new FolderInfo(NewPath.toString());
+                                    info.setRenamed(true, oldPath.toString());
+                                    folderChanges.add(info);
+                                });
+                            }
+
+                        File file = filename.toFile();
+                        if(file.isDirectory()){
+                            FolderInfo info = new FolderInfo(filename.toString());
+                            info.setAdded(true);
+                            folderChanges.add(info);
+                        }else{
+                            FileInfo info = new FileInfo(filename.toString(), FileManager.getHash(file));
+                            info.setAdded(true);
+                            fileChanges.add(info);
+                        }
+                    }else if(kind == ENTRY_MODIFY){
+                        File file = filename.toFile();
+                        if(file.isFile()){
+                            FileInfo info = new FileInfo(filename.toString(), FileManager.getHash(file));
+                            fileChanges.add(info);
+                        }
+                    }else{
+                        if(folderWatcher.isDirectoryRegisterd(filename)){
+                            FolderInfo info = new FolderInfo(filename.toString());
+                            info.setRemoved(true);
+                            folderChanges.remove(info);
+                        }else{
+                            FileInfo info = new FileInfo(filename.toString(), null);
+                            info.setRemoved(true);
+                            fileChanges.remove(info);
+                        }
+
+                    }
+
+                }//For end
+                
+                boolean valid = folderWatcher.checkKey(key);
+                if(!valid){
+                    throw new RuntimeException("Error in FileSystem");
                 }
-                
-                for(FileInfo info : changes){
-                    System.out.println(info);
-                }
-                
-                if(!isRunning){
-                    throw new IOException("just for testing");
-                }
-                
-                //Update the Server Files
-                /*
-                Packet pack = new Packet(PacketTypes.GET_TREE);
-                client.sendData(pack);
-                Packet retPack = client.readData();
-                FileStorage serverStorage = (FileStorage) retPack.get(0);
-                List<FileInfo> changes = serverStorage.getChanges();
-                updateServer(client, changes, storage);
-                */
-                
-                /*
-                try {
-                    List<FileInfo> changes = storage.update();
-                    updateServer(client, changes, storage);
-                } catch (IOException ex) {
-                    Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
-}
-                */
-                
+            
+            //UPLOAD FILES
             }catch(IOException e){
                 System.err.println("Error while sending data");
                 if(e.getCause() != null)
                     System.err.println(e.getCause().toString());
             }
-            System.out.println("re-check");
         }
         
-        }catch(IOException e){
+        }catch(FileSystemException e){
             System.err.println("Filesystem error");
             if(e.getCause() != null)
                 System.err.println(e.getCause().toString());

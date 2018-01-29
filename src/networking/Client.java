@@ -15,11 +15,14 @@
  */
 package networking;
 
+import Utils.NetworkingException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -27,15 +30,20 @@ import java.net.Socket;
  */
 public class Client implements java.io.Closeable{
     
-    private final Socket socket;
+    private Socket socket;
     private final ObjectOutputStream outStream;
     private final ObjectInputStream inStream;
     
-    public Client(String host, int port, int timeOut) throws IOException{
-        socket = new Socket();
-        socket.connect(new InetSocketAddress(host, port), timeOut);
-        outStream = new ObjectOutputStream(socket.getOutputStream());
-        inStream = new ObjectInputStream(socket.getInputStream());
+    public Client(String host, int port, int timeOut) throws NetworkingException{
+        try {
+            socket = new Socket();
+            socket.connect(new InetSocketAddress(host, port), timeOut);
+            outStream = new ObjectOutputStream(socket.getOutputStream());
+            inStream = new ObjectInputStream(socket.getInputStream());
+        } catch (IOException ex) {
+            try{ if(socket != null){ socket.close(); } }catch(IOException e) {}
+            throw new NetworkingException();
+        }
     }
     
     public void sendData(Packet o) throws IOException{
