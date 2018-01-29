@@ -26,7 +26,6 @@ public class FileInfo extends Info implements Serializable {
 	private String fileHash;
 	private boolean added;
 	private boolean removed;
-        private boolean isDirectory;
 	
 	public FileInfo(String path, String hash) {
 		filePath = path;
@@ -73,12 +72,15 @@ public class FileInfo extends Info implements Serializable {
 		this.removed = removed;
 	}
         
-        public boolean isDirectory(){
-            return isDirectory;
-        }
-        
-        public void setDirectory(boolean dir){
-            isDirectory = dir;
+        @Override
+        public int getWeight(){
+            int base = -1;
+            if(filePath != null && !filePath.isEmpty())
+                base++;
+            if(added || removed)
+                base++;
+            
+            return base;
         }
 	
         @Override
@@ -106,6 +108,11 @@ public class FileInfo extends Info implements Serializable {
         @Override
         public String toString(){
             return filePath + (added?" added":"") + (removed?" removed":"");
+        }
+        
+        @Override
+        public String getType(){
+            return "FileInfo";
         }
 	
 }

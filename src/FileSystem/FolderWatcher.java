@@ -30,6 +30,7 @@ import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 /**
  *
@@ -51,7 +52,7 @@ public class FolderWatcher {
         this.keys = new HashMap<>();
 
         System.out.format("Scanning %s ...\n", dir);
-        registerAll(dir);
+        registerAll(dir, null);
         System.out.println("Done.");
 
 
@@ -71,24 +72,20 @@ public class FolderWatcher {
         return keys.get(key);
     }
     
-    public void addFolderToWatch(Path folder) throws IOException{
-        registerAll(folder);
-    }
-    
-    public void registerAll(final Path start) throws IOException {
+    public void registerAll(final Path start, BiConsumer<Path, Path> renameCallback) throws IOException {
         // register directory and sub-directories
         Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
                 throws IOException
             {
-                register(dir);
+                register(dir, renameCallback);
                 return FileVisitResult.CONTINUE;
             }
         });
     }
     
-    private void register(Path dir) throws IOException {
+    private void register(Path dir, BiConsumer<Path, Path> renameCallback) throws IOException {
         WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
         if (trace) {
             Path prev = keys.get(key);
@@ -96,7 +93,11 @@ public class FolderWatcher {
                 System.out.format("register: %s\n", dir);
             } else {
                 if (!dir.equals(prev)) {
-                    System.out.format("update: %s -> %s\n", prev, dir);
+                    if(renameCallback != null){
+                        renameCallback.accept(prev, dir);
+                    }
+                    
+                    //System.out.format("update: %s -> %s\n", prev, dir);
                 }
             }
         }
@@ -114,6 +115,10 @@ public class FolderWatcher {
             }
         }
         return true;
+    }
+    
+    public boolean isDirectoryRegisterd(Path path){
+        return keys.containsValue(path);
     }
 
 }

@@ -23,9 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.SyncFailedException;
 import java.nio.file.*;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import networking.Client;
 import networking.Packet;
 import networking.PacketTypes;
@@ -142,14 +140,9 @@ public class ClientHandler {
                 if(e.getCause() != null)
                     System.err.println(e.getCause().toString());
             }
-            Thread.sleep(15000);
             System.out.println("re-check");
         }
         
-        }catch (InterruptedException ex) {
-            System.err.println("Thread error");
-            System.err.println(ex.getCause().toString());
-            System.exit(1);
         }catch(IOException e){
             System.err.println("Filesystem error");
             if(e.getCause() != null)

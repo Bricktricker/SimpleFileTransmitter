@@ -24,9 +24,9 @@ import java.util.Objects;
  */
 public class FolderInfo extends Info implements Serializable{
     
-	private static final long serialVersionUID = 69878761527707186L;
+    private static final long serialVersionUID = 69878761527707186L;
 	
-	private String path;
+    private String path;
     private String oldPath;
     private boolean added;
     private boolean removed;
@@ -84,6 +84,19 @@ public class FolderInfo extends Info implements Serializable{
     }
     
     @Override
+    public int getWeight(){
+        int base = -1;
+        if(path != null && !path.isEmpty())
+            base++;
+        if(added || removed)
+            base++;
+        if(renamed)
+            base+=2;
+
+        return base;
+    }
+    
+    @Override
     public boolean equals(Object obj){
         if(obj == null)
                 return false;
@@ -107,6 +120,11 @@ public class FolderInfo extends Info implements Serializable{
     @Override
     public String toString(){
         return path + (added?" added":"") + (removed?" removed":"") + (renamed?" reanmed from: " + oldPath :"");
+    }
+    
+    @Override
+    public String getType(){
+        return "FolderInfo";
     }
     
 }

@@ -33,4 +33,8 @@ public abstract class Info {
 
     public abstract void setRemoved(boolean removed);
     
+    public abstract int getWeight();
+    
+    public abstract String getType();
+    
 }

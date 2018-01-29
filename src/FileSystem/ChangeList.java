@@ -33,9 +33,9 @@ public class ChangeList<T extends Info> {
         changes = new HashMap<>();
     }
     
-    public void add(T file){
+    public void addWithoutWeight(T file){
         changes.put(file.getPath(), file);
-        System.out.println("added " + file.toString());
+        System.out.println("added to " + file.getType() + " ChangeList " + file.toString());
     }
     
     public void remove(T file){
@@ -53,6 +53,25 @@ public class ChangeList<T extends Info> {
         List<T> changesAsList = new LinkedList<>();
         changeCollection.forEach( v->changesAsList.add(v) );
         return changesAsList;
+    }
+    
+    public boolean containsKey(String path){
+        return changes.containsKey(path);
+    }
+    
+    public boolean containsValue(T value){
+        return changes.containsValue(value);
+    }
+    
+    public void add(T newVal){
+        if(containsKey(newVal.getPath())){
+            T oldVal = changes.get(newVal.getPath());
+            if(oldVal.getWeight() < newVal.getWeight()){
+                addWithoutWeight(newVal);
+            }
+        }else{
+            addWithoutWeight(newVal);
+        }
     }
     
     public void clear(){

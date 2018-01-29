@@ -39,81 +39,86 @@ public class FileTester {
     
     public static void main(String[] args) throws IOException{
         FileManager.workingDir = "D:\\Eigene Dateien\\Bilder\\";        
-        //Übergeben an Funktion
+        //Ãœbergeben an Funktion
         FileStorage storage = FileManager.createFileStorage();
         
         //Vor der loop
         Path folder = storage.getFolder();
         FolderWatcher folderWatcher = new FolderWatcher(folder);
         while(true){
-            ChangeList<FileInfo> fileChanges = new ChangeList<>();
-            ChangeList<FolderInfo> folderChanges = new ChangeList<>();
-            WatchKey key = folderWatcher.getEvents();
-            Path dir = folderWatcher.getPath(key);
+            try{
+                
+                ChangeList<FileInfo> fileChanges = new ChangeList<>();
+                ChangeList<FolderInfo> folderChanges = new ChangeList<>();
+                WatchKey key = folderWatcher.getEvents();
+                Path dir = folderWatcher.getPath(key);
 
-            for (WatchEvent<?> event : key.pollEvents()) {
-                Kind<?> kind = event.kind();
-                
-                if(kind == OVERFLOW){
-                    System.err.println("OVERFLOW");
-                    continue;
-                }
-                
-                WatchEvent<Path> ev = FolderWatcher.cast(event);
-                Path name = ev.context();
-                Path filename = dir.resolve(name);
-                
-                if(kind == ENTRY_CREATE){
-                    if (Files.isDirectory(filename, NOFOLLOW_LINKS)) {
-                            folderWatcher.registerAll(filename);
+                for (WatchEvent<?> event : key.pollEvents()) {
+                    Kind<?> kind = event.kind();
+
+                    if(kind == OVERFLOW){
+                        System.err.println("OVERFLOW");
+                        continue;
+                    }
+
+                    WatchEvent<Path> ev = FolderWatcher.cast(event);
+                    Path name = ev.context();
+                    Path filename = dir.resolve(name);
+
+                    if(kind == ENTRY_CREATE){
+                        if (Files.isDirectory(filename, NOFOLLOW_LINKS)) {
+                                folderWatcher.registerAll(filename, (oldPath, NewPath)->{
+                                    FolderInfo info = new FolderInfo(NewPath.toString());
+                                    info.setRenamed(true, oldPath.toString());
+                                    folderChanges.add(info);
+                                });
+                            }
+
+                        File file = filename.toFile();
+                        if(file.isDirectory()){
+                            FolderInfo info = new FolderInfo(filename.toString());
+                            info.setAdded(true);
+                            folderChanges.add(info);
+                        }else{
+                            FileInfo info = new FileInfo(filename.toString(), FileManager.getHash(file));
+                            info.setAdded(true);
+                            fileChanges.add(info);
                         }
-                    
-                    File file = filename.toFile();
-                    if(file.isDirectory()){
-                        FolderInfo info = new FolderInfo(filename.toString());
-                        info.setAdded(true);
-                        folderChanges.add(info);
-                        folderWatcher.addFolderToWatch(filename);
+                    }else if(kind == ENTRY_MODIFY){
+                        File file = filename.toFile();
+                        if(file.isFile()){
+                            FileInfo info = new FileInfo(filename.toString(), FileManager.getHash(file));
+                            fileChanges.add(info);
+                        }
                     }else{
-                        FileInfo info = new FileInfo(filename.toString(), FileManager.getHash(file));
-                        info.setAdded(true);
-                        fileChanges.add(info);
+
+                        File file = filename.toFile();
+                        if(folderWatcher.isDirectoryRegisterd(filename)){
+                            FolderInfo info = new FolderInfo(filename.toString());
+                            info.setRemoved(true);
+                            folderChanges.remove(info);
+                        }else{
+                            FileInfo info = new FileInfo(filename.toString(), null);
+                            info.setRemoved(true);
+                            fileChanges.remove(info);
+                        }
+
                     }
-                }else if(kind == ENTRY_MODIFY){
-                    File file = filename.toFile();
-                    if(file.isDirectory()){
-                        /*
-                        FolderInfo info = new FolderInfo(filename.toString());
-                        folderChanges.add(info);
-                        folderWatcher.addFolderToWatch(filename);
-                        */
-                    }else{
-                        FileInfo info = new FileInfo(filename.toString(), FileManager.getHash(file));
-                        fileChanges.add(info);
-                    }
-                }else{
-                    File file = filename.toFile();
-                    if(file.isDirectory()){
-                        FolderInfo info = new FolderInfo(filename.toString());
-                        info.setRemoved(true);
-                        folderChanges.remove(info);
-                    }else{
-                        FileInfo info = new FileInfo(filename.toString(), null);
-                        info.setRemoved(true);
-                        fileChanges.remove(info);
-                    }
-                }
+
+                }//For end
                 
-            }
-            boolean valid = folderWatcher.checkKey(key);
-            if(!valid){
-                throw new RuntimeException("Error in FileSystem");
-            }
+                boolean valid = folderWatcher.checkKey(key);
+                if(!valid){
+                    throw new RuntimeException("Error in FileSystem");
+                }
             
             //UPLOAD FILES
-            if(fileChanges.size() > 0 || folderChanges.size() > 0){
-                
+            }catch(IOException e){
+                System.err.println("Error while sending data");
+                if(e.getCause() != null)
+                    System.err.println(e.getCause().toString());
             }
+            
         }
     }
 }
