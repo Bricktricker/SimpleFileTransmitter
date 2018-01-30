@@ -18,15 +18,20 @@ package FileSystem;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * Holds information about about a file, which has to be updated
+ * @author Philipp
+ *
+ */
 public class FileInfo extends Info implements Serializable {
 
 	private static final long serialVersionUID = 5143096375634312506L;
-	
+
 	private String filePath;
 	private String fileHash;
 	private boolean added;
 	private boolean removed;
-	
+
 	public FileInfo(String path, String hash) {
 		filePath = path;
 		fileHash = hash;
@@ -34,12 +39,12 @@ public class FileInfo extends Info implements Serializable {
 		removed = false;
 	}
 
-        @Override
+	@Override
 	public String getPath() {
 		return filePath;
 	}
 
-        @Override
+	@Override
 	public void setPath(String filePath) {
 		this.filePath = filePath;
 	}
@@ -52,67 +57,67 @@ public class FileInfo extends Info implements Serializable {
 		this.fileHash = fileHash;
 	}
 
-        @Override
+	@Override
 	public boolean isAdded() {
 		return added;
 	}
 
-        @Override
+	@Override
 	public void setAdded(boolean added) {
 		this.added = added;
 	}
 
-        @Override
+	@Override
 	public boolean isRemoved() {
 		return removed;
 	}
 
-        @Override
+	@Override
 	public void setRemoved(boolean removed) {
 		this.removed = removed;
 	}
-        
-        @Override
-        public int getWeight(){
-            int base = -1;
-            if(filePath != null && !filePath.isEmpty())
-                base++;
-            if(added || removed)
-                base++;
-            
-            return base;
-        }
-	
-        @Override
-        public boolean equals( Object obj ){
-            if(obj == null)
-                return false;
-            if(obj == this)
-                return true;
-            if (! obj.getClass().equals(getClass()))
-                return false;
-            
-            FileInfo other = (FileInfo) obj;
-            boolean filePathDif = filePath.equals(other.filePath);
-            //boolean hashDif = fileHash.equals(other.fileHash);
-            return filePathDif;
-        }
 
-        @Override
-        public int hashCode() {
-            int hash = 3;
-            hash = 37 * hash + Objects.hashCode(this.filePath);
-            return hash;
-        }
+	@Override
+	public int getWeight() {
+		int base = -1;
+		if (filePath != null && !filePath.isEmpty())
+			base++;
+		if (added || removed)
+			base++;
 
-        @Override
-        public String toString(){
-            return filePath + (added?" added":"") + (removed?" removed":"");
-        }
-        
-        @Override
-        public String getType(){
-            return "FileInfo";
-        }
-	
+		return base;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		if (obj == this)
+			return true;
+		if (!obj.getClass().equals(getClass()))
+			return false;
+
+		FileInfo other = (FileInfo) obj;
+		boolean filePathDif = filePath.equals(other.filePath);
+		// boolean hashDif = fileHash.equals(other.fileHash);
+		return filePathDif;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 3;
+		hash = 37 * hash + Objects.hashCode(this.filePath);
+		return hash;
+	}
+
+	@Override
+	public String toString() {
+		return filePath + (added ? " added" : "") + (removed ? " removed" : "");
+	}
+
+	@Override
+	public String getType() {
+		return "FileInfo";
+	}
+
 }

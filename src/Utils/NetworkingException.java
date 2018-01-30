@@ -15,11 +15,13 @@
  */
 package Utils;
 
+import java.io.IOException;
+
 /**
  *
  * @author Philipp
  */
-public class NetworkingException extends Exception{
+public class NetworkingException extends IOException{
     
 	private static final long serialVersionUID = -8274177573997610485L;
 

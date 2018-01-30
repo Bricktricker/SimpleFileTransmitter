@@ -18,54 +18,53 @@ import networking.Server;
  * @author Philipp
  */
 public class SeverHandler {
-    
-    public static int port = 8080;
-    
-    public static void handleServer(FileStorage storage) throws IOException{
-        Server server = new Server(port);
-                server.waitForUser();
-                
-                while(server.isConnected()){
-                    Packet pack = (Packet) server.getData();
-                    if(pack == null){
-                        continue;
-                    }
-                    
-                    PacketTypes type = pack.getType();
-                    switch (type) {
-                        case CONNECT:
-                            Packet p = new Packet(PacketTypes.CONNECTED);
-                            server.sendData(p);
-                            break;
-                        case CONNECTED:
-                            System.err.println("Got packet of type CONNECTED, should not happen!");
-                            break;
-                        case GET_TREE:
-                            storage.getChanges();
-                            Packet treePack = new Packet(PacketTypes.SEND_TREE, storage);
-                            server.sendData(treePack);
-                            break;
-                        case SEND_FILE:
-                            FileInfo info = (FileInfo) pack.get(0);
-                            byte[] fileData = (byte[]) pack.get(1);
-                            FileManager.handleFileInput(info, fileData);
-                            
-                            Packet recvPack = new Packet(PacketTypes.FILE_RECEIVED, info.getPath());
-                            server.sendData(recvPack);
-                            break;
-                        case ALL_FILES_SEND:
-                            storage.getChanges();
-                            break;
-                        case KEEP_ALIVE:
-                            break;
-                        default:
-                            System.err.println("Type " + type + " not found");
-                            continue;
-                    }
-                    
-                    
-                }
-                server.stopServer();
-    }
-    
+
+	public static int port = 8080;
+
+	public static void handleServer(FileStorage storage) {
+		Server server = new Server(port);
+		server.waitForUser();
+
+		while (server.isConnected()) {
+			Packet pack = (Packet) server.getData();
+			if (pack == null) {
+				continue;
+			}
+
+			PacketTypes type = pack.getType();
+			switch (type) {
+			case CONNECT:
+				Packet p = new Packet(PacketTypes.CONNECTED);
+				server.sendData(p);
+				break;
+			case CONNECTED:
+				System.err.println("Got packet of type CONNECTED, should not happen!");
+				break;
+			case GET_TREE:
+				storage.getChanges();
+				Packet treePack = new Packet(PacketTypes.SEND_TREE, storage);
+				server.sendData(treePack);
+				break;
+			case SEND_FILE:
+				FileInfo info = (FileInfo) pack.get(0);
+				byte[] fileData = (byte[]) pack.get(1);
+				FileManager.handleFileInput(info, fileData);
+
+				Packet recvPack = new Packet(PacketTypes.FILE_RECEIVED, info.getPath());
+				server.sendData(recvPack);
+				break;
+			case ALL_FILES_SEND:
+				storage.getChanges();
+				break;
+			case KEEP_ALIVE:
+				break;
+			default:
+				System.err.println("Type " + type + " not found");
+				continue;
+			}
+
+		}
+		server.stopServer();
+	}
+
 }

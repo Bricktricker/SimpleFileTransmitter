@@ -34,100 +34,95 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 /**
- *
+ * Registers all changes in a folder and it's subfolders
+ * 
  * @author Philipp
  */
 public class FolderWatcher {
-    
-    private final WatchService watcher;
-    private final Map<WatchKey,Path> keys;
-    private boolean trace = false;
-    
-    @SuppressWarnings("unchecked")
-    public static <T> WatchEvent<T> cast(WatchEvent<?> event) {
-        return (WatchEvent<T>)event;
-    }
-    
-    public FolderWatcher(Path dir) throws FileSystemException{
-        try{
-            this.watcher = FileSystems.getDefault().newWatchService();
-            this.keys = new HashMap<>();
 
-            System.out.format("Scanning %s ...\n", dir);
-            registerAll(dir, null);
-            System.out.println("Done.");
+	private final WatchService watcher;
+	private final Map<WatchKey, Path> keys;
+	private boolean trace = false;
 
-            // enable trace after initial registration
-            this.trace = true;
-        }catch(IOException e){
-            throw new FileSystemException(null);
-        }
-    }
-    
-    public WatchKey getEvents(){
-        try {
-            return watcher.take();
-        } catch (InterruptedException x) {
-            return null;
-        }
-    }
-    
-    public Path getPath(WatchKey key){
-        return keys.get(key);
-    }
-    
-    public void registerAll(final Path start, BiConsumer<Path, Path> renameCallback) throws FileSystemException {
-        try{
-            // register directory and sub-directories
-            Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-                    throws IOException
-                {
-                    register(dir, renameCallback);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        }catch(IOException e){
-            throw new FileSystemException(null);
-        }
-        
-    }
-    
-    private void register(Path dir, BiConsumer<Path, Path> renameCallback) throws IOException {
-        WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-        if (trace) {
-            Path prev = keys.get(key);
-            if (prev == null) {
-                System.out.format("register: %s\n", dir);
-            } else {
-                if (!dir.equals(prev)) {
-                    if(renameCallback != null){
-                        renameCallback.accept(prev, dir);
-                    }
-                    
-                    //System.out.format("update: %s -> %s\n", prev, dir);
-                }
-            }
-        }
-        keys.put(key, dir);
-    }
-    
-    public boolean checkKey(WatchKey key){
-        boolean valid = key.reset();
-        if (!valid) {
-            keys.remove(key);
+	@SuppressWarnings("unchecked")
+	public static <T> WatchEvent<T> cast(WatchEvent<?> event) {
+		return (WatchEvent<T>) event;
+	}
 
-            // all directories are inaccessible
-            if (keys.isEmpty()) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    public boolean isDirectoryRegisterd(Path path){
-        return keys.containsValue(path);
-    }
+	public FolderWatcher(Path dir) throws FileSystemException {
+		try {
+			this.watcher = FileSystems.getDefault().newWatchService();
+			this.keys = new HashMap<>();
+
+			System.out.format("Scanning %s ...\n", dir);
+			registerAll(dir, null);
+			System.out.println("Done.");
+
+			// enable trace after initial registration
+			this.trace = true;
+		} catch (IOException e) {
+			throw new FileSystemException(null);
+		}
+	}
+
+	public WatchKey getEvents() throws InterruptedException {
+		return watcher.take();
+	}
+
+	public Path getPath(WatchKey key) {
+		return keys.get(key);
+	}
+
+	public void registerAll(final Path start, BiConsumer<Path, Path> renameCallback) throws FileSystemException {
+		try {
+			// register directory and sub-directories
+			Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+					register(dir, renameCallback);
+					return FileVisitResult.CONTINUE;
+				}
+			});
+		} catch (IOException e) {
+			throw new FileSystemException(null);
+		}
+
+	}
+
+	private void register(Path dir, BiConsumer<Path, Path> renameCallback) throws IOException {
+		WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+		if (trace) {
+			Path prev = keys.get(key);
+			if (prev == null) {
+				System.out.format("register: %s\n", dir);
+			} else {
+				if (!dir.equals(prev)) {
+					if (renameCallback != null) {
+						renameCallback.accept(prev, dir);
+					}
+
+					// System.out.format("update: %s -> %s\n", prev, dir);
+				}
+			}
+		}
+		keys.put(key, dir);
+	}
+
+	public boolean checkKey(WatchKey key) {
+		boolean valid = key.reset();
+		if (!valid) {
+			keys.remove(key);
+
+			// all directories are inaccessible
+			if (keys.isEmpty()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean isDirectoryRegisterd(Path path) {
+		return keys.containsValue(path);
+	}
 
 }

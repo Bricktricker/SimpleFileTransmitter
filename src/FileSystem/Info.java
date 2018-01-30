@@ -16,25 +16,26 @@
 package FileSystem;
 
 /**
- *
+ * Abstract class for basic Info functions
+ * 
  * @author Philipp
  */
 public abstract class Info {
-    
-    public abstract String getPath();
-    
-    public abstract void setPath(String path);
-    
-    public abstract boolean isAdded();
 
-    public abstract void setAdded(boolean added);
+	public abstract String getPath();
 
-    public abstract boolean isRemoved();
+	public abstract void setPath(String path);
 
-    public abstract void setRemoved(boolean removed);
-    
-    public abstract int getWeight();
-    
-    public abstract String getType();
-    
+	public abstract boolean isAdded();
+
+	public abstract void setAdded(boolean added);
+
+	public abstract boolean isRemoved();
+
+	public abstract void setRemoved(boolean removed);
+
+	public abstract int getWeight();
+
+	public abstract String getType();
+
 }

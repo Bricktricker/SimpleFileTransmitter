@@ -30,88 +30,93 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
 
+/**
+ * Static class for basic file handling
+ * @author Philipp
+ *
+ */
 public class FileManager {
 
 	public static String workingDir = "";
-	
+
 	public static FileStorage createFileStorage() {
 		FileStorage storage;
-		if(workingDir.isEmpty()) {
+		if (workingDir.isEmpty()) {
 			storage = new FileStorage();
-		}else {
+		} else {
 			storage = new FileStorage(workingDir);
 		}
-		
+
 		storage.updateStorage();
 		return storage;
 	}
-        
-        public static FileStorage createEmptyStorage() {
+
+	public static FileStorage createEmptyStorage() {
 		FileStorage storage;
-		if(workingDir.isEmpty()) {
+		if (workingDir.isEmpty()) {
 			storage = new FileStorage();
-		}else {
+		} else {
 			storage = new FileStorage(workingDir);
 		}
-		
+
 		return storage;
 	}
-        
-        public static void handleFileInput(FileInfo info, byte[] fileData){
-            if(info.isRemoved()){
-                try {
-                    Files.delete(Paths.get(workingDir + "/" + info.getPath()));
-                } catch (NoSuchFileException ex) {
-                    System.err.format("%s: no such" + " file or directory%n", workingDir + "/" + info.getPath());
-                } catch (DirectoryNotEmptyException ex) {
-                    System.err.format("%s not empty%n", workingDir + "/" + info.getPath());
-                } catch (IOException ex) {
-                    System.err.println("Not allowed to write to " + workingDir + "/" + info.getPath());
-                }
-            }else{
-                writeFile(info.getPath(), fileData);
-            }
-        }
-        
-        public static void createFolder(FileInfo info){
-            Paths.get(workingDir + "/" + info.getPath()).toFile().mkdirs();
-        }
-        
-        private static void writeFile(String path, byte[] fileData){
-            try {
-                FileOutputStream fos = new FileOutputStream(workingDir + "/" + path);
-                fos.write(fileData);
-                fos.flush();
-                fos.close();
-            }catch (IOException ex) {
-                System.err.println("Error writing file " + workingDir + "/" + path);
-            }
-        }
-        
-        //generate hash from file
+
+	public static void handleFileInput(FileInfo info, byte[] fileData) {
+		if (info.isRemoved()) {
+			try {
+				Files.delete(Paths.get(workingDir + "/" + info.getPath()));
+			} catch (NoSuchFileException ex) {
+				System.err.format("%s: no such" + " file or directory%n", workingDir + "/" + info.getPath());
+			} catch (DirectoryNotEmptyException ex) {
+				System.err.format("%s not empty%n", workingDir + "/" + info.getPath());
+			} catch (IOException ex) {
+				System.err.println("Not allowed to write to " + workingDir + "/" + info.getPath());
+			}
+		} else {
+			writeFile(info.getPath(), fileData);
+		}
+	}
+
+	public static void createFolder(FileInfo info) {
+		Paths.get(workingDir + "/" + info.getPath()).toFile().mkdirs();
+	}
+
+	private static void writeFile(String path, byte[] fileData) {
+		try {
+			FileOutputStream fos = new FileOutputStream(workingDir + "/" + path);
+			fos.write(fileData);
+			fos.flush();
+			fos.close();
+		} catch (IOException ex) {
+			System.err.println("Error writing file " + workingDir + "/" + path);
+		}
+	}
+
+	// generate hash from file
 	public static String getHash(final File file) throws FileSystemException {
-	    try{
-                
-            final MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+		try {
 
-	    try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
-	      final byte[] buffer = new byte[1024];
-	      for (int read = 0; (read = is.read(buffer)) != -1;) {
-	        messageDigest.update(buffer, 0, read);
-	      }
-	    }catch(IOException e){
-                throw new FileSystemException(file.getPath());
-            }
+			final MessageDigest messageDigest = MessageDigest.getInstance("MD5");
 
-	    // Convert the byte to hex format
-	    try (Formatter formatter = new Formatter()) {
-	      for (final byte b : messageDigest.digest()) {
-	        formatter.format("%02x", b);
-	      }
-	      return formatter.toString();
-	    }
-            }catch(NoSuchAlgorithmException e){
-                return "";
-            }
+			try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
+				final byte[] buffer = new byte[1024];
+				for (int read = 0; (read = is.read(buffer)) != -1;) {
+					messageDigest.update(buffer, 0, read);
+				}
+			} catch (IOException e) {
+				throw new FileSystemException(file.getPath());
+			}
+
+			// Convert the byte to hex format
+			try (Formatter formatter = new Formatter()) {
+				for (final byte b : messageDigest.digest()) {
+					formatter.format("%02x", b);
+				}
+				return formatter.toString();
+			}
+		} catch (NoSuchAlgorithmException e) {
+			return "";
+		}
 	}
 }

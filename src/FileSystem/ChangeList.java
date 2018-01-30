@@ -21,65 +21,65 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- *
+ * This class holds all changes in a directory or changed files.
  * @author Philipp
- * @param <T>
+ * @param <T> Either FileInfo or FolderInfo
  */
 public class ChangeList<T extends Info> {
-    
-    private final HashMap<String, T> changes;
-    
-    public ChangeList(){
-        changes = new HashMap<>();
-    }
-    
-    public void addWithoutWeight(T file){
-        changes.put(file.getPath(), file);
-        System.out.println("added to " + file.getType() + " ChangeList " + file.toString());
-    }
-    
-    public void remove(T file){
-        if(changes.containsKey(file.getPath())){
-            changes.remove(file.getPath());
-            System.out.println("removed " + file.getPath() + " from map");
-        }else{
-            file.setRemoved(true);
-            add(file);
-        }
-    }
-    
-    public List<T> getAllChanges(){
-        Collection<T> changeCollection = changes.values();
-        List<T> changesAsList = new LinkedList<>();
-        changeCollection.forEach( v->changesAsList.add(v) );
-        return changesAsList;
-    }
-    
-    public boolean containsKey(String path){
-        return changes.containsKey(path);
-    }
-    
-    public boolean containsValue(T value){
-        return changes.containsValue(value);
-    }
-    
-    public void add(T newVal){
-        if(containsKey(newVal.getPath())){
-            T oldVal = changes.get(newVal.getPath());
-            if(oldVal.getWeight() < newVal.getWeight()){
-                addWithoutWeight(newVal);
-            }
-        }else{
-            addWithoutWeight(newVal);
-        }
-    }
-    
-    public void clear(){
-        changes.clear();
-    }
-    
-    public int size(){
-        return changes.size();
-    }
-    
+
+	private final HashMap<String, T> changes;
+
+	public ChangeList() {
+		changes = new HashMap<>();
+	}
+
+	public void addWithoutWeight(T file) {
+		changes.put(file.getPath(), file);
+		System.out.println("added to " + file.getType() + " ChangeList " + file.toString());
+	}
+
+	public void remove(T file) {
+		if (changes.containsKey(file.getPath())) {
+			changes.remove(file.getPath());
+			System.out.println("removed " + file.getPath() + " from map");
+		} else {
+			file.setRemoved(true);
+			add(file);
+		}
+	}
+
+	public List<T> getAllChanges() {
+		Collection<T> changeCollection = changes.values();
+		List<T> changesAsList = new LinkedList<>();
+		changeCollection.forEach(v -> changesAsList.add(v));
+		return changesAsList;
+	}
+
+	public boolean containsKey(String path) {
+		return changes.containsKey(path);
+	}
+
+	public boolean containsValue(T value) {
+		return changes.containsValue(value);
+	}
+
+	public void add(T newVal) {
+		if (containsKey(newVal.getPath())) {
+			T oldVal = changes.get(newVal.getPath());
+			if (oldVal.getWeight() < newVal.getWeight()) {
+				addWithoutWeight(newVal);
+			}
+		} else {
+			addWithoutWeight(newVal);
+		}
+	}
+
+	public void clear() {
+		changes.clear();
+	}
+
+	public int size() {
+		return changes.size();
+	}
+
 }

@@ -19,6 +19,7 @@ import Utils.NetworkingException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.SyncFailedException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
@@ -26,55 +27,62 @@ import java.net.Socket;
  *
  * @author Philipp
  */
-public class Client implements java.io.Closeable{
-    
-    private Socket socket;
-    private final ObjectOutputStream outStream;
-    private final ObjectInputStream inStream;
-    
-    public Client(String host, int port, int timeOut) throws NetworkingException{
-        try {
-            socket = new Socket();
-            socket.connect(new InetSocketAddress(host, port), timeOut);
-            outStream = new ObjectOutputStream(socket.getOutputStream());
-            inStream = new ObjectInputStream(socket.getInputStream());
-        } catch (IOException ex) {
-            try{ if(socket != null){ socket.close(); } }catch(IOException e) {}
-            throw new NetworkingException();
-        }
-    }
-    
-    public void sendData(Packet o) throws NetworkingException{
-        try{
-            outStream.writeObject(o);
-            outStream.flush(); 
-        }catch(IOException e){
-            throw new NetworkingException("Error sending Packet");
-        }
-        
-    }
-    
-    public Packet readData(){
-        try {
-            Object o = inStream.readObject();
-            if(o instanceof Packet){
-                return (Packet)o;
-            }
-        } catch (IOException | ClassNotFoundException ex) {
-            //Logger.getLogger(Server.class.getName()).log(Level.WARNING, null, ex);
-        }
-        return null;
-    }
-    
-    public boolean isConnected(){
-        return !socket.isClosed();
-    }
+public class Client implements java.io.Closeable {
 
-    @Override
-    public void close() throws IOException {
-        outStream.close();
-        inStream.close();
-        socket.close();
-    }
-    
+	private Socket socket;
+	private final ObjectOutputStream outStream;
+	private final ObjectInputStream inStream;
+
+	public Client(String host, int port, int timeOut) throws NetworkingException {
+		try {
+			socket = new Socket();
+			socket.connect(new InetSocketAddress(host, port), timeOut);
+			outStream = new ObjectOutputStream(socket.getOutputStream());
+			inStream = new ObjectInputStream(socket.getInputStream());
+		} catch (IOException ex) {
+			try {
+				if (socket != null) {
+					socket.close();
+				}
+			} catch (IOException e) {
+			}
+			throw new NetworkingException();
+		}
+	}
+
+	public void sendData(Packet o) throws NetworkingException {
+		try {
+			outStream.writeObject(o);
+			outStream.flush();
+		} catch (IOException e) {
+			throw new NetworkingException("Error sending Packet");
+		}
+
+	}
+
+	public Packet readData() throws NetworkingException, SyncFailedException {
+		try {
+			Object o = inStream.readObject();
+			if (o instanceof Packet) {
+				return (Packet) o;
+			}
+		} catch (IOException e) {
+			throw new NetworkingException("Error reading data from the server");
+		} catch (ClassNotFoundException e) {
+			throw new SyncFailedException("Data corrupted");
+		}
+		return null;
+	}
+
+	public boolean isConnected() {
+		return !socket.isClosed();
+	}
+
+	@Override
+	public void close() throws IOException {
+		outStream.close();
+		inStream.close();
+		socket.close();
+	}
+
 }

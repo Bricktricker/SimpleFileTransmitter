@@ -16,9 +16,9 @@
 package networking;
 
 /**
- *
+ * All packet types for comunication
  * @author Philipp
  */
 public enum PacketTypes {
-    CONNECT, CONNECTED, GET_TREE, SEND_TREE, CREATE_FOLDER, SEND_FILE, FILE_RECEIVED, ALL_FILES_SEND, KEEP_ALIVE
+    CONNECT, CONNECTED, GET_TREE, SEND_TREE, CREATE_FOLDER, SEND_FILE, FILE_RECEIVED, ALL_FILES_SEND, KEEP_ALIVE, ERROR
 }
