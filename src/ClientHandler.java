@@ -20,6 +20,8 @@ import FileSystem.FileManager;
 import FileSystem.FileStorage;
 import FileSystem.FolderInfo;
 import FileSystem.FolderWatcher;
+import Utils.NetworkingException;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.SyncFailedException;
@@ -45,7 +47,7 @@ public class ClientHandler {
     
     private static Client client;
     
-    public static void handleClient(FileStorage storage){
+    public static void handleClient(FileStorage storage) throws SyncFailedException{
         //Connect and initial update
         try{
             //Connect
@@ -58,6 +60,7 @@ public class ClientHandler {
             }
             
             //Inital update
+            //!!!!!!!Also get folder chnages!!!!!!!!!!!
             Packet treePack = new Packet(PacketTypes.GET_TREE);
             client.sendData(treePack);
             Packet retPack = client.readData();
@@ -67,7 +70,7 @@ public class ClientHandler {
             List<FileInfo> changes = serverStorage.getChanges();
             updateServer(client, changes, storage);
                 
-        }catch(IOException e){
+        }catch(NetworkingException e){
             System.err.println("Could not connect to Server");
             if(e.getCause() != null)
                 System.err.println(e.getCause().toString());
@@ -150,12 +153,13 @@ public class ClientHandler {
                 }
             
             //UPLOAD FILES
+                
             }catch(IOException e){
                 System.err.println("Error while sending data");
                 if(e.getCause() != null)
                     System.err.println(e.getCause().toString());
-            }
-        }
+            }//inner try
+        }//while loop
         
         }catch(FileSystemException e){
             System.err.println("Filesystem error");
@@ -166,28 +170,27 @@ public class ClientHandler {
         }
     }
     
-    public static void updateServer(Client client, List<FileInfo> changes, FileStorage storage) throws IOException{
+    public static void updateServer(Client client, List<FileInfo> changes, FileStorage storage) throws NetworkingException{
         for(FileInfo info : changes){
             try{
                 
-            
-            if(info.isRemoved()){
-                Packet pack = new Packet(PacketTypes.SEND_FILE, info, (Object)null);
-                client.sendData(pack);
-            }else{
-                Path path = Paths.get(storage.getFolder().toString() + "/" + info.getPath());
-                byte[] data = Files.readAllBytes(path);
-                
-                Packet pack = new Packet(PacketTypes.SEND_FILE, info, data);
-                client.sendData(pack);
-            }
-            Packet retPack = client.readData();
-            if(retPack.getType() == PacketTypes.FILE_RECEIVED){
-                String gotPath = (String) retPack.get(0);
-                if(!gotPath.equals(info.getPath())){
-                    System.err.println("Error sending file");
-                }
-            }
+	            if(info.isRemoved()){
+	                Packet pack = new Packet(PacketTypes.SEND_FILE, info, (Object)null);
+	                client.sendData(pack);
+	            }else{
+	                Path path = Paths.get(storage.getFolder().toString() + "/" + info.getPath());
+	                byte[] data = Files.readAllBytes(path);
+	                
+	                Packet pack = new Packet(PacketTypes.SEND_FILE, info, data);
+	                client.sendData(pack);
+	            }
+	            Packet retPack = client.readData();
+	            if(retPack.getType() == PacketTypes.FILE_RECEIVED){
+	                String gotPath = (String) retPack.get(0);
+	                if(!gotPath.equals(info.getPath())){
+	                    System.err.println("Error sending file");
+	                }
+	            }
             
             }catch(NoSuchFileException e){
                 System.err.println("File " + info.getPath() + " not found");

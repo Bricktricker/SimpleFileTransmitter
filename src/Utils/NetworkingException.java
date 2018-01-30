@@ -21,7 +21,9 @@ package Utils;
  */
 public class NetworkingException extends Exception{
     
-    public NetworkingException(){
+	private static final long serialVersionUID = -8274177573997610485L;
+
+	public NetworkingException(){
         super();
     }
     

@@ -21,6 +21,8 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import Utils.NetworkingException;
+
 /**
  *
  * @author Philipp
@@ -33,15 +35,23 @@ public class Server implements java.io.Closeable{
     private ObjectOutputStream outStream;
     private ObjectInputStream inStream;
     
-    public Server(int port) throws IOException{
-        socket = new ServerSocket(port);
+    public Server(int port) throws NetworkingException{
+        try {
+			socket = new ServerSocket(port);
+		} catch (IOException e) {
+			throw new NetworkingException();
+		}
     }
     
     
-    public void disconnect() throws IOException{
-        outStream.close();
-        inStream.close();
-        userSocket.close();
+    public void disconnect() throws NetworkingException{
+        try {
+			outStream.close();
+			inStream.close();
+	        userSocket.close();
+		} catch (IOException e) {
+			throw new NetworkingException();
+		}
     }
     
     
@@ -70,7 +80,7 @@ public class Server implements java.io.Closeable{
                 return (Packet)o;
             }
         } catch (IOException ex) {
-            try { disconnect(); } catch (IOException e) { }
+            try { disconnect(); } catch (NetworkingException e) { }
         }catch (ClassNotFoundException ex){ }
         return null;
     }

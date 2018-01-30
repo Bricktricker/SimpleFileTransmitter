@@ -21,8 +21,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -46,12 +44,12 @@ public class Client implements java.io.Closeable{
         }
     }
     
-    public void sendData(Packet o) throws IOException{
+    public void sendData(Packet o) throws NetworkingException{
         try{
             outStream.writeObject(o);
             outStream.flush(); 
         }catch(IOException e){
-            throw new IOException("Error sending Packet");
+            throw new NetworkingException("Error sending Packet");
         }
         
     }

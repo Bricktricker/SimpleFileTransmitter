@@ -100,7 +100,7 @@ public class FileManager {
 	        messageDigest.update(buffer, 0, read);
 	      }
 	    }catch(IOException e){
-                throw new FileSystemException(null);
+                throw new FileSystemException(file.getPath());
             }
 
 	    // Convert the byte to hex format

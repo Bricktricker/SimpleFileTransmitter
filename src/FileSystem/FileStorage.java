@@ -26,11 +26,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import Utils.Pair;
-import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.nio.file.FileSystemException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class FileStorage implements Serializable{
 	
@@ -87,8 +84,8 @@ public class FileStorage implements Serializable{
                                 //Add file to new FileStorage
                                 newStorage.addFile(p, hash);
 				
-				} catch (IOException e) {
-                                    Logger.getLogger(FileStorage.class.getName()).log(Level.SEVERE, null, e);
+				}catch (FileSystemException e) {
+					System.err.println("could not read " + e.getFile());
 				}
 			
 			//File is folder, add it recursively to List
@@ -146,7 +143,7 @@ public class FileStorage implements Serializable{
 			String p = getRelPath(file.toPath());
 			fileMap.put(p, hash);
 		} catch (IOException e) {
-                    throw new FileSystemException(file.toString());
+			throw new FileSystemException(file.toString());
 		}
 	}
         
