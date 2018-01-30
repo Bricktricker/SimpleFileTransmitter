@@ -194,7 +194,8 @@ public class ClientHandler {
             
             }catch(NoSuchFileException e){
                 System.err.println("File " + info.getPath() + " not found");
-                e.printStackTrace();
+            }catch(IOException e){
+                System.err.println("Error reading " + info.getPath());
             }
         }
         
