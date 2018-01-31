@@ -52,7 +52,7 @@ public class ClientHandler {
 		// Connect and initial update
 
 		// Connect
-		int numConnectionTrys = 0;
+		int numServerErrors = 0;
 		try {
 			client = new Client(serverAddress, port, timeOut);
 			Packet pack = new Packet(PacketTypes.CONNECT);
@@ -62,12 +62,13 @@ public class ClientHandler {
 				throw new SyncFailedException("Server answerd not properly");
 			}
 		} catch (NetworkingException e) {
-			numConnectionTrys++;
-			if(numConnectionTrys > 3) {
+			numServerErrors++;
+			if(numServerErrors > 3) {
 				throw new NetworkingException("Connection refused");
 			}
 		}
 		
+		numServerErrors = 0;
 		
 		try {
 			// Inital update
@@ -78,7 +79,7 @@ public class ClientHandler {
 			FileStorage serverStorage = (FileStorage) retPack.get(0);
 			serverStorage.setFolder(storage.getFolder());
 			List<FileInfo> changes = serverStorage.getChanges();
-			sendFileChanges(changes, storage);
+			sendFileChanges(changes, storage.getFolder());
 
 		} catch (NetworkingException e) {
 			System.err.println("Could not connect to Server");
@@ -164,14 +165,21 @@ public class ClientHandler {
 
 					// UPLOAD FILES
 					List<FolderInfo> folderChangesAsList = folderChanges.getAllChanges();
-					sendFolderChanges(folderChangesAsList, storage);
+					sendFolderChanges(folderChangesAsList);
 					List<FileInfo> fileChangesAsList = fileChanges.getAllChanges();
-					sendFileChanges(fileChangesAsList, storage);
+					sendFileChanges(fileChangesAsList, storage.getFolder());
 					
-				} catch (IOException e) {
+					
+					numServerErrors = 0; //reset server errors, cause everything worked correctly
+				} catch (FileSystemException e) {
+					numServerErrors++;
 					System.err.println("Error while sending data");
 					if (e.getCause() != null)
 						System.err.println(e.getCause().toString());
+					
+					if(numServerErrors > 3) {
+						throw new IOException("Server not working correctly");
+					}
 				} // inner try
 			} // while loop
 
@@ -189,7 +197,7 @@ public class ClientHandler {
 		}
 	}
 
-	private static void sendFileChanges(List<FileInfo> changes, FileStorage storage)
+	private static void sendFileChanges(List<FileInfo> changes, Path pathToProject)
 			throws NetworkingException {
 		for (FileInfo info : changes) {
 			try {
@@ -198,14 +206,14 @@ public class ClientHandler {
 					Packet pack = new Packet(PacketTypes.SEND_FILE, info, (Object) null);
 					client.sendData(pack);
 				} else {
-					Path path = Paths.get(storage.getFolder().toString() + "/" + info.getPath());
+					Path path = Paths.get(pathToProject.toString() + "/" + info.getPath());
 					byte[] data = Files.readAllBytes(path);
 
 					Packet pack = new Packet(PacketTypes.SEND_FILE, info, data);
 					client.sendData(pack);
 				}
 				Packet retPack = client.readData();
-				if (retPack.getType() == PacketTypes.FILE_RECEIVED) {
+				if (retPack.getType() == PacketTypes.PACKET_RECEIVED) {
 					String gotPath = (String) retPack.get(0);
 					if (!gotPath.equals(info.getPath())) {
 						System.err.println("Error sending file");
@@ -219,12 +227,28 @@ public class ClientHandler {
 			}
 		}
 
-		Packet pack = new Packet(PacketTypes.ALL_FILES_SEND);
+		Packet pack = new Packet(PacketTypes.ALL_PACK_SEND);
 		client.sendData(pack);
 	}
 	
-	private static void sendFolderChanges(List<FolderInfo> changes, FileStorage storage) {
-		
+	/**
+	 * 
+	 * @param changes a List of all the folder changes (folder created, folder renamed, folder deleted)
+	 * @throws NetworkingException throws if data could not be send properly
+	 */
+	private static void sendFolderChanges(List<FolderInfo> changes) throws NetworkingException {
+		for(FolderInfo info : changes) {
+			Packet packet = new Packet(PacketTypes.FOLDER_CHANGE, info);
+			client.sendData(packet);
+			Packet retPacket = client.readData();
+			if(retPacket.getType() != PacketTypes.PACKET_RECEIVED) {
+				throw new NetworkingException("Sever not answerd correctly");
+			}
+		}
+		Packet packFin = new Packet(PacketTypes.ALL_PACK_SEND);
+		if(packFin.getType() != PacketTypes.PACKET_RECEIVED) {
+			throw new NetworkingException("Error sending folder changes");
+		}
 	}
 
 }

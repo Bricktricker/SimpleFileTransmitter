@@ -19,7 +19,6 @@ import Utils.NetworkingException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.SyncFailedException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
@@ -60,18 +59,18 @@ public class Client implements java.io.Closeable {
 
 	}
 
-	public Packet readData() throws NetworkingException, SyncFailedException {
+	public Packet readData() throws NetworkingException {
 		try {
 			Object o = inStream.readObject();
 			if (o instanceof Packet) {
 				return (Packet) o;
 			}
+			throw new NetworkingException("Data corrupted");
 		} catch (IOException e) {
 			throw new NetworkingException("Error reading data from the server");
 		} catch (ClassNotFoundException e) {
-			throw new SyncFailedException("Data corrupted");
+			throw new NetworkingException("Data corrupted");
 		}
-		return null;
 	}
 
 	public boolean isConnected() {
