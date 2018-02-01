@@ -25,6 +25,7 @@ import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -37,54 +38,59 @@ import java.util.Formatter;
  */
 public class FileManager {
 
-	public static String workingDir = "";
+	public static Path workingDir = Paths.get("").toAbsolutePath();
 
 	public static FileStorage createFileStorage() {
-		FileStorage storage;
-		if (workingDir.isEmpty()) {
-			storage = new FileStorage();
-		} else {
-			storage = new FileStorage(workingDir);
-		}
-
+		FileStorage storage = new FileStorage();
 		storage.updateStorage();
 		return storage;
 	}
+	
+	/**
+	 * gets path of the file relative to the project folder
+	 * @param absolute path to file
+	 * @return relative path to file
+	 */
+	public static Path getRelPath(Path filepath) {
+		return workingDir.relativize(filepath);
+	}
 
 	public static FileStorage createEmptyStorage() {
-		FileStorage storage;
-		if (workingDir.isEmpty()) {
-			storage = new FileStorage();
-		} else {
-			storage = new FileStorage(workingDir);
-		}
-
-		return storage;
+		return new FileStorage();
 	}
 
 	public static void handleFileInput(FileInfo info, byte[] fileData) {
 		if (info.isRemoved()) {
 			try {
-				Files.delete(Paths.get(workingDir + "/" + info.getPath()));
+				Files.delete(workingDir.resolve(info.getPath()));
 			} catch (NoSuchFileException ex) {
-				System.err.format("%s: no such" + " file or directory%n", workingDir + "/" + info.getPath());
+				System.err.format("%s: no such" + " file or directory%n", workingDir.resolve(info.getPath()));
 			} catch (DirectoryNotEmptyException ex) {
-				System.err.format("%s not empty%n", workingDir + "/" + info.getPath());
+				System.err.format("%s not empty%n", workingDir.resolve(info.getPath()));
 			} catch (IOException ex) {
-				System.err.println("Not allowed to write to " + workingDir + "/" + info.getPath());
+				System.err.println("Not allowed to write to " + workingDir.resolve(info.getPath()));
 			}
 		} else {
 			writeFile(info.getPath(), fileData);
 		}
 	}
 
-	public static void createFolder(FileInfo info) {
-		Paths.get(workingDir + "/" + info.getPath()).toFile().mkdirs();
+	/**
+	 * creates folder at path location
+	 * @param relative path to new folder
+	 */
+	public static void createFolder(Path path) {
+		workingDir.resolve(path).toFile().mkdirs();
 	}
 
+	/**
+	 * writes file to disc
+	 * @param realtive path to written file
+	 * @param fileData data of the file
+	 */
 	private static void writeFile(String path, byte[] fileData) {
 		try {
-			FileOutputStream fos = new FileOutputStream(workingDir + "/" + path);
+			FileOutputStream fos = new FileOutputStream(workingDir.resolve(path).toString());
 			fos.write(fileData);
 			fos.flush();
 			fos.close();
@@ -93,7 +99,12 @@ public class FileManager {
 		}
 	}
 
-	// generate hash from file
+	/**
+	 * generates hash from file
+	 * @param file
+	 * @return generated MD5 hash of file
+	 * @throws FileSystemException
+	 */
 	public static String getHash(final File file) throws FileSystemException {
 		try {
 

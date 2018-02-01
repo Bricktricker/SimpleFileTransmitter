@@ -2,7 +2,6 @@
 import FileSystem.FileInfo;
 import FileSystem.FileManager;
 import FileSystem.FileStorage;
-import java.io.IOException;
 import networking.Packet;
 import networking.PacketTypes;
 import networking.Server;
@@ -19,7 +18,7 @@ import networking.Server;
  */
 public class SeverHandler {
 
-	public static int port = 8080;
+	public static int port = 8636;
 
 	public static void handleServer(FileStorage storage) {
 		Server server = new Server(port);
@@ -50,10 +49,10 @@ public class SeverHandler {
 				byte[] fileData = (byte[]) pack.get(1);
 				FileManager.handleFileInput(info, fileData);
 
-				Packet recvPack = new Packet(PacketTypes.FILE_RECEIVED, info.getPath());
+				Packet recvPack = new Packet(PacketTypes.PACKET_RECEIVED, info.getPath());
 				server.sendData(recvPack);
 				break;
-			case ALL_FILES_SEND:
+			case ALL_PACK_SEND:
 				storage.getChanges();
 				break;
 			case KEEP_ALIVE:

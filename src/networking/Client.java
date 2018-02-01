@@ -23,7 +23,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 /**
- *
+ * Simple client implementation
  * @author Philipp
  */
 public class Client implements java.io.Closeable {

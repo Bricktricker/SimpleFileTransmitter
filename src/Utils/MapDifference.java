@@ -21,12 +21,18 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 /**
- *
+ * Holds static functions for map manipulation
  * @author Philipp
  */
 public class MapDifference {
     
-    public static <K, V> Set<Entry<K, V>> mapDifference(Map<K,V> left, Map<K,V> right) {
+	/**
+	 * Calculates the symmetric map difference from the key-set of two given maps
+	 * @param left first map
+	 * @param right second map
+	 * @return set of symmetric difference
+	 */
+    public static <K, V> Set<Entry<K, V>> symmetricMapDifference(Map<K,V> left, Map<K,V> right) {
         Set<Entry<K, V>> diff12 = new HashSet<>(left.entrySet());
         Set<Entry<K, V>> diff21 = new HashSet<>(right.entrySet());
         

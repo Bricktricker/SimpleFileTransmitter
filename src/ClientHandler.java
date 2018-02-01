@@ -42,7 +42,7 @@ import networking.PacketTypes;
  */
 public class ClientHandler {
 
-	public static int port = 8080;
+	public static int port = 8636;
 	public static String serverAddress = "";
 	public static int timeOut = 5000;
 
@@ -77,9 +77,8 @@ public class ClientHandler {
 			Packet retPack = client.readData();
 
 			FileStorage serverStorage = (FileStorage) retPack.get(0);
-			serverStorage.setFolder(storage.getFolder());
 			List<FileInfo> changes = serverStorage.getChanges();
-			sendFileChanges(changes, storage.getFolder());
+			sendFileChanges(changes);
 
 		} catch (NetworkingException e) {
 			System.err.println("Could not connect to Server");
@@ -95,8 +94,7 @@ public class ClientHandler {
 
 		try {
 			boolean isRunning = true;
-			Path folder = storage.getFolder();
-			FolderWatcher folderWatcher = new FolderWatcher(folder);
+			FolderWatcher folderWatcher = new FolderWatcher(FileManager.workingDir);
 
 			while (isRunning) {
 				try {
@@ -125,7 +123,7 @@ public class ClientHandler {
 									info.setRenamed(true, oldPath.toString());
 									folderChanges.add(info);
 								});
-							}
+							} //if end isDirectory
 
 							File file = filename.toFile();
 							if (file.isDirectory()) {
@@ -143,7 +141,7 @@ public class ClientHandler {
 								FileInfo info = new FileInfo(filename.toString(), FileManager.getHash(file));
 								fileChanges.add(info);
 							}
-						} else {
+						} else { //ENTRY_DELETE
 							if (folderWatcher.isDirectoryRegisterd(filename)) {
 								FolderInfo info = new FolderInfo(filename.toString());
 								info.setRemoved(true);
@@ -167,11 +165,11 @@ public class ClientHandler {
 					List<FolderInfo> folderChangesAsList = folderChanges.getAllChanges();
 					sendFolderChanges(folderChangesAsList);
 					List<FileInfo> fileChangesAsList = fileChanges.getAllChanges();
-					sendFileChanges(fileChangesAsList, storage.getFolder());
+					sendFileChanges(fileChangesAsList);
 					
 					
 					numServerErrors = 0; //reset server errors, cause everything worked correctly
-				} catch (FileSystemException e) {
+				} catch (NetworkingException e) { //inner try
 					numServerErrors++;
 					System.err.println("Error while sending data");
 					if (e.getCause() != null)
@@ -180,14 +178,15 @@ public class ClientHandler {
 					if(numServerErrors > 3) {
 						throw new IOException("Server not working correctly");
 					}
-				} // inner try
+				} // inner catch
 			} // while loop
 
-		} catch (FileSystemException e) {
+		} catch (FileSystemException e) {//outer try
 			System.err.println("Filesystem error");
 			if (e.getCause() != null)
 				System.err.println(e.getCause().toString());
 		} catch(InterruptedException e) {
+			//WatchService interrupted
 		}
 		finally {
 			try {
@@ -197,7 +196,7 @@ public class ClientHandler {
 		}
 	}
 
-	private static void sendFileChanges(List<FileInfo> changes, Path pathToProject)
+	private static void sendFileChanges(List<FileInfo> changes)
 			throws NetworkingException {
 		for (FileInfo info : changes) {
 			try {
@@ -206,7 +205,7 @@ public class ClientHandler {
 					Packet pack = new Packet(PacketTypes.SEND_FILE, info, (Object) null);
 					client.sendData(pack);
 				} else {
-					Path path = Paths.get(pathToProject.toString() + "/" + info.getPath());
+					Path path = FileManager.workingDir.resolve(info.getPath());
 					byte[] data = Files.readAllBytes(path);
 
 					Packet pack = new Packet(PacketTypes.SEND_FILE, info, data);
@@ -242,12 +241,21 @@ public class ClientHandler {
 			client.sendData(packet);
 			Packet retPacket = client.readData();
 			if(retPacket.getType() != PacketTypes.PACKET_RECEIVED) {
-				throw new NetworkingException("Sever not answerd correctly");
+				String errStr = "Error sending folder changes";
+				if(retPacket.getType() == PacketTypes.ERROR)
+					errStr = (String) retPacket.get(0);
+				throw new NetworkingException(errStr);
 			}
 		}
 		Packet packFin = new Packet(PacketTypes.ALL_PACK_SEND);
-		if(packFin.getType() != PacketTypes.PACKET_RECEIVED) {
-			throw new NetworkingException("Error sending folder changes");
+		client.sendData(packFin);
+		Packet retPack = client.readData();
+		
+		if(retPack.getType() != PacketTypes.PACKET_RECEIVED) {
+			String errStr = "Error sending folder changes";
+			if(retPack.getType() == PacketTypes.ERROR)
+				errStr = (String) retPack.get(0);
+			throw new NetworkingException(errStr);
 		}
 	}
 

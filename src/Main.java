@@ -46,7 +46,7 @@ public class Main {
 				if (s.substring(1).equalsIgnoreCase("folder")) {
 					try {
 						Paths.get(args[i + 1]);
-						FileManager.workingDir = args[i + 1];
+						FileManager.workingDir = Paths.get(args[i + 1]);
 					} catch (InvalidPathException ex) {
 						System.err.println("Path could not be resolved");
 						System.exit(1);
