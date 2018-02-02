@@ -78,8 +78,10 @@ public class Main {
 
 		try {
 			if (appType == AppType.SERVER) {
+				System.out.println("started server");
 				SeverHandler.handleServer();
 			} else {
+				System.out.println("started client");
 				ClientHandler.handleClient();
 			}
 		} catch (IOException e) {

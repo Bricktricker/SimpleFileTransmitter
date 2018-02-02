@@ -24,7 +24,7 @@ import java.net.Socket;
 import Utils.NetworkingException;
 
 /**
- *
+ * basic server implementation for sending packages
  * @author Philipp
  */
 public class Server implements java.io.Closeable {
@@ -35,6 +35,11 @@ public class Server implements java.io.Closeable {
 	private ObjectOutputStream outStream;
 	private ObjectInputStream inStream;
 
+	/**
+	 * constructs a server Object at specified port
+	 * @param port to listen for communication
+	 * @throws NetworkingException if not able to bind the server to port
+	 */
 	public Server(int port) throws NetworkingException {
 		try {
 			socket = new ServerSocket(port);
@@ -43,6 +48,10 @@ public class Server implements java.io.Closeable {
 		}
 	}
 
+	/**
+	 * disconnects the server from the current user
+	 * @throws NetworkingException if not able to disconnect
+	 */
 	public void disconnect() throws NetworkingException {
 		try {
 			outStream.close();

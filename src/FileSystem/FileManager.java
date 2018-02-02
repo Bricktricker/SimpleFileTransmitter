@@ -42,6 +42,10 @@ public class FileManager {
 
 	public static Path workingDir = Paths.get("").toAbsolutePath();
 
+	/**
+	 * returns a new initialized FileStorage
+	 * @return new FileStorage Object
+	 */
 	public static FileStorage createFileStorage() {
 		FileStorage storage = new FileStorage();
 		storage.updateStorage();
@@ -50,9 +54,7 @@ public class FileManager {
 
 	/**
 	 * gets path of the file relative to the project folder
-	 * 
-	 * @param filepath
-	 *            absolute path to file
+	 * @param filepath absolute path to file
 	 * @return relative path to file
 	 */
 	public static Path getRelPath(Path filepath) {
@@ -61,22 +63,30 @@ public class FileManager {
 
 	/**
 	 * gets path of the file relative to the project folder
-	 * 
-	 * @param filepath
-	 *            relative String to file
+	 * @param filepath relative String to file
 	 * @return relative path to file
 	 */
 	public static Path getRelPath(String filepath) {
 		return getRelPath(workingDir.resolve(filepath));
 	}
 
+	/**
+	 * returns a new uninitialized FileStorage
+	 * @return uninitialized new FileStorage
+	 */
 	public static FileStorage createEmptyStorage() {
 		return new FileStorage();
 	}
 
+	/**
+	 * Parses the FileInfo and apples changes to the file system
+	 * @param info the file which has to be handled
+	 * @param fileData the raw file data or null if the file has to be removed
+	 * @throws IOException if it is not possible to delete the file
+	 */
 	public static void handleFileInput(FileInfo info, byte[] fileData) throws IOException {
 		if (info.isRemoved()) {
-			Files.delete(workingDir.resolve(info.getPath()));
+			deleteFileOrFolder(workingDir.resolve(info.getPath()));
 		} else {
 			writeFile(info.getPath(), fileData);
 		}
@@ -84,14 +94,17 @@ public class FileManager {
 
 	/**
 	 * creates folder at path location
-	 * 
-	 * @param relative
-	 *            path to new folder
+	 * @param relative path to new folder
 	 */
 	public static void createFolder(Path path) {
 		workingDir.resolve(path).toFile().mkdirs();
 	}
 
+	/**
+	 * deletes the file or folder at specified location
+	 * @param path to file/folder
+	 * @throws IOException if not able to delete the file/folder
+	 */
 	private static void deleteFileOrFolder(final Path path) throws IOException {
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 			@Override
@@ -120,15 +133,16 @@ public class FileManager {
 		});
 	};
 
-	public static void handleFolderInput(FolderInfo info) {
+	/**
+	 * Parses the FolderInfo and apples changes to the file system
+	 * @param info the folder which has to be handled
+	 * @throws IOException if not possible to delete the folder
+	 */
+	public static void handleFolderInput(FolderInfo info) throws IOException {
 		if (info.isAdded()) {
 			createFolder(getRelPath(info.getPath()));
 		} else if (info.isRemoved()) {
-			try {
-				deleteFileOrFolder(workingDir.resolve(info.getPath()));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			deleteFileOrFolder(workingDir.resolve(info.getPath()));
 		} else if (info.isRenamed()) {
 			File oldFolder = new File(workingDir.resolve(info.getOldPath()).toString());
 			File newFolder = new File(workingDir.resolve(info.getPath()).toString());
@@ -138,11 +152,8 @@ public class FileManager {
 
 	/**
 	 * writes file to disc
-	 * 
-	 * @param realtive
-	 *            path to written file
-	 * @param fileData
-	 *            data of the file
+	 * @param realtive path to written file
+	 * @param fileData data of the file
 	 */
 	private static void writeFile(String path, byte[] fileData) {
 		try {
