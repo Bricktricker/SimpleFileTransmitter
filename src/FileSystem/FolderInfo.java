@@ -26,12 +26,19 @@ public class FolderInfo extends Info implements Serializable {
 
 	private static final long serialVersionUID = 69878761527707186L;
 
+        /**
+         * relative path to folder
+         */
 	private String path;
 	private String oldPath;
 	private boolean added;
 	private boolean removed;
 	private boolean renamed;
 
+        /**
+         * creates an folderPath object
+         * @param folderPath relative path to folder
+         */
 	public FolderInfo(String folderPath) {
 		path = folderPath;
 	}

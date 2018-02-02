@@ -65,7 +65,7 @@ public class Server implements java.io.Closeable {
 	public void waitForUser() throws NetworkingException {
 		try {
 			userSocket = socket.accept();
-			System.out.println("use connected: " + userSocket.toString());
+			System.out.println("user connected: " + userSocket.toString());
 			outStream = new ObjectOutputStream(userSocket.getOutputStream());
 			inStream = new ObjectInputStream(userSocket.getInputStream());
 		} catch (IOException e) {
