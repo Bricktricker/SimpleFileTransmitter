@@ -17,6 +17,13 @@ package Utils;
 
 import java.util.Objects;
 
+/**
+ * Packs to Object in to one pair
+ * @author Philipp
+ *
+ * @param <T1> Object 1
+ * @param <T2> Object 2
+ */
 public class Pair<T1, T2>{
 		
 	private T1 val1;

@@ -27,74 +27,85 @@ import Utils.NetworkingException;
  *
  * @author Philipp
  */
-public class Server implements java.io.Closeable{
-    
-    private final ServerSocket socket;
-    private Socket userSocket;
-    
-    private ObjectOutputStream outStream;
-    private ObjectInputStream inStream;
-    
-    public Server(int port) throws NetworkingException{
-        try {
+public class Server implements java.io.Closeable {
+
+	private final ServerSocket socket;
+	private Socket userSocket;
+
+	private ObjectOutputStream outStream;
+	private ObjectInputStream inStream;
+
+	public Server(int port) throws NetworkingException {
+		try {
 			socket = new ServerSocket(port);
 		} catch (IOException e) {
 			throw new NetworkingException();
 		}
-    }
-    
-    
-    public void disconnect() throws NetworkingException{
-        try {
+	}
+
+	public void disconnect() throws NetworkingException {
+		try {
 			outStream.close();
 			inStream.close();
-	        userSocket.close();
+			userSocket.close();
 		} catch (IOException e) {
 			throw new NetworkingException();
 		}
-    }
-    
-    
-    public void stopServer(){
-        try {
-            close();
-        } catch (IOException ex) { }
-    }
-    
-    public void waitForUser() throws IOException{
-        userSocket = socket.accept();
-        System.out.println("use connected: " + userSocket.toString());
-        outStream = new ObjectOutputStream(userSocket.getOutputStream());
-        inStream = new ObjectInputStream(userSocket.getInputStream());
-    }
-    
-    public void sendData(Packet data) throws IOException{
-        outStream.writeObject(data);
-        outStream.flush();
-    }
-    
-    public Packet getData(){
-        try {
-            Object o = inStream.readObject();
-            if(o instanceof Packet){
-                return (Packet)o;
-            }
-        } catch (IOException ex) {
-            try { disconnect(); } catch (NetworkingException e) { }
-        }catch (ClassNotFoundException ex){ }
-        return null;
-    }
-    
-    public boolean isConnected(){
-        return !userSocket.isClosed();
-    }
+	}
 
-    @Override
-    public void close() throws IOException {
-        outStream.close();
-        inStream.close();
-        userSocket.close();
-        socket.close();
-    }
-    
+	public void waitForUser() throws NetworkingException {
+		try {
+			userSocket = socket.accept();
+			System.out.println("use connected: " + userSocket.toString());
+			outStream = new ObjectOutputStream(userSocket.getOutputStream());
+			inStream = new ObjectInputStream(userSocket.getInputStream());
+		} catch (IOException e) {
+			if (e.getMessage() != null)
+				throw new NetworkingException(e.getMessage());
+
+			throw new NetworkingException("Error while user connected");
+		}
+	}
+
+	public void sendData(Packet data) throws NetworkingException {
+		try {
+			outStream.writeObject(data);
+			outStream.flush();
+		} catch (IOException e) {
+			if (e.getMessage() != null)
+				throw new NetworkingException(e.getMessage());
+
+			throw new NetworkingException("Error while user connected");
+
+		}
+	}
+
+	public Packet getData() {
+		try {
+			Object o = inStream.readObject();
+			if (o instanceof Packet) {
+				return (Packet) o;
+			}
+		} catch (IOException ex) {
+			try {
+				disconnect();
+			} catch (NetworkingException e) {
+			}
+		} catch (ClassNotFoundException ex) {
+		}
+		return null;
+	}
+
+	public boolean isConnected() {
+		return !userSocket.isClosed();
+	}
+
+	@Override
+	public void close() throws IOException {
+		outStream.close();
+		inStream.close();
+		userSocket.close();
+		socket.close();
+	}
+
 }

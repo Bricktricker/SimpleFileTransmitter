@@ -18,25 +18,42 @@ package Utils;
 import java.io.IOException;
 
 /**
- *
+ * Exception for networking errors
  * @author Philipp
+ * @see IOException
  */
 public class NetworkingException extends IOException{
     
 	private static final long serialVersionUID = -8274177573997610485L;
 
+	/**
+	 * Creates NetworkingException
+	 */
 	public NetworkingException(){
         super();
     }
     
+	/**
+	 * Creates NetworkingException and sets error cause
+	 * @param message cause of Error
+	 */
     public NetworkingException(String message){
         super(message);
     }
     
+    /**
+     * Creates NetworkingException
+     * @param message cause of error
+     * @param cause throwable
+     */
     public NetworkingException(String message, Throwable cause){
         super(message, cause);
     }
     
+    /**
+     * creates NetworkingException
+     * @param cause reason of exception
+     */
     public NetworkingException(Throwable cause){
         super(cause);
     }

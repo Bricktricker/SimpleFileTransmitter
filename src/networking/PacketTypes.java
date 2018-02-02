@@ -16,7 +16,7 @@
 package networking;
 
 /**
- * All packet types for comunication
+ * All packet types for communication
  * @author Philipp
  */
 public enum PacketTypes {

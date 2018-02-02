@@ -16,8 +16,6 @@
  */
 
 import FileSystem.FileManager;
-import FileSystem.FileStorage;
-
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
@@ -78,16 +76,14 @@ public class Main {
 			System.exit(1);
 		}
 
-		FileStorage origStorage = FileManager.createFileStorage();
-
-		if (appType == AppType.SERVER) {
-			SeverHandler.handleServer(origStorage);
-		} else {
-			try {
-				ClientHandler.handleClient(origStorage);
-			} catch (IOException e) {
-				System.err.println(e.getMessage());
+		try {
+			if (appType == AppType.SERVER) {
+				SeverHandler.handleServer();
+			} else {
+				ClientHandler.handleClient();
 			}
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
 		}
 
 	}

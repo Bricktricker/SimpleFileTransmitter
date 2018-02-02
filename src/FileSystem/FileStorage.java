@@ -119,6 +119,7 @@ public class FileStorage implements Serializable {
 
 	// loads current folder status and saves it in fileMap
 	public void updateStorage() {
+		fileMap.clear();
 		updateStorageRecursive(FileManager.workingDir.toString());
 	}
 

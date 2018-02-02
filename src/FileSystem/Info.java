@@ -23,7 +23,7 @@ package FileSystem;
 public abstract class Info {
 
 	/**
-	 * returns the relative path to the project directory from this info
+	 * returns the relative path from the project directory to this info
 	 * @return path of info
 	 */
 	public abstract String getPath();

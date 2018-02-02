@@ -21,18 +21,20 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileSystemException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
 
 /**
  * Static class for basic file handling
+ * 
  * @author Philipp
  *
  */
@@ -45,31 +47,36 @@ public class FileManager {
 		storage.updateStorage();
 		return storage;
 	}
-	
+
 	/**
 	 * gets path of the file relative to the project folder
-	 * @param absolute path to file
+	 * 
+	 * @param filepath
+	 *            absolute path to file
 	 * @return relative path to file
 	 */
 	public static Path getRelPath(Path filepath) {
 		return workingDir.relativize(filepath);
 	}
 
+	/**
+	 * gets path of the file relative to the project folder
+	 * 
+	 * @param filepath
+	 *            relative String to file
+	 * @return relative path to file
+	 */
+	public static Path getRelPath(String filepath) {
+		return getRelPath(workingDir.resolve(filepath));
+	}
+
 	public static FileStorage createEmptyStorage() {
 		return new FileStorage();
 	}
 
-	public static void handleFileInput(FileInfo info, byte[] fileData) {
+	public static void handleFileInput(FileInfo info, byte[] fileData) throws IOException {
 		if (info.isRemoved()) {
-			try {
-				Files.delete(workingDir.resolve(info.getPath()));
-			} catch (NoSuchFileException ex) {
-				System.err.format("%s: no such" + " file or directory%n", workingDir.resolve(info.getPath()));
-			} catch (DirectoryNotEmptyException ex) {
-				System.err.format("%s not empty%n", workingDir.resolve(info.getPath()));
-			} catch (IOException ex) {
-				System.err.println("Not allowed to write to " + workingDir.resolve(info.getPath()));
-			}
+			Files.delete(workingDir.resolve(info.getPath()));
 		} else {
 			writeFile(info.getPath(), fileData);
 		}
@@ -77,16 +84,65 @@ public class FileManager {
 
 	/**
 	 * creates folder at path location
-	 * @param relative path to new folder
+	 * 
+	 * @param relative
+	 *            path to new folder
 	 */
 	public static void createFolder(Path path) {
 		workingDir.resolve(path).toFile().mkdirs();
 	}
 
+	private static void deleteFileOrFolder(final Path path) throws IOException {
+		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+				Files.delete(file);
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFileFailed(final Path file, final IOException e) {
+				return handleException(e);
+			}
+
+			private FileVisitResult handleException(final IOException e) {
+				e.printStackTrace(); // replace with more robust error handling
+				return FileVisitResult.TERMINATE;
+			}
+
+			@Override
+			public FileVisitResult postVisitDirectory(final Path dir, final IOException e) throws IOException {
+				if (e != null)
+					return handleException(e);
+				Files.delete(dir);
+				return FileVisitResult.CONTINUE;
+			}
+		});
+	};
+
+	public static void handleFolderInput(FolderInfo info) {
+		if (info.isAdded()) {
+			createFolder(getRelPath(info.getPath()));
+		} else if (info.isRemoved()) {
+			try {
+				deleteFileOrFolder(workingDir.resolve(info.getPath()));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else if (info.isRenamed()) {
+			File oldFolder = new File(workingDir.resolve(info.getOldPath()).toString());
+			File newFolder = new File(workingDir.resolve(info.getPath()).toString());
+			oldFolder.renameTo(newFolder);
+		}
+	}
+
 	/**
 	 * writes file to disc
-	 * @param realtive path to written file
-	 * @param fileData data of the file
+	 * 
+	 * @param realtive
+	 *            path to written file
+	 * @param fileData
+	 *            data of the file
 	 */
 	private static void writeFile(String path, byte[] fileData) {
 		try {
@@ -101,6 +157,7 @@ public class FileManager {
 
 	/**
 	 * generates hash from file
+	 * 
 	 * @param file
 	 * @return generated MD5 hash of file
 	 * @throws FileSystemException

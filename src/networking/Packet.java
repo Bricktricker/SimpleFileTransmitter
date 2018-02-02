@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Holds data of one packet
+ * Holds data for a networking packet
  * @author Philipp
  */
 public class Packet extends ArrayList<Object> implements Serializable{

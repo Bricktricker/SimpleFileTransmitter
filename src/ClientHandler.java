@@ -48,7 +48,7 @@ public class ClientHandler {
 
 	private static Client client;
 
-	public static void handleClient(FileStorage storage) throws IOException {
+	public static void handleClient() throws IOException {
 		// Connect and initial update
 
 		// Connect
@@ -217,6 +217,8 @@ public class ClientHandler {
 					if (!gotPath.equals(info.getPath())) {
 						System.err.println("Error sending file");
 					}
+				}else if(retPack.getType() == PacketTypes.ERROR) {
+					throw new IOException((String)retPack.get(0));
 				}
 
 			} catch (NoSuchFileException e) {
