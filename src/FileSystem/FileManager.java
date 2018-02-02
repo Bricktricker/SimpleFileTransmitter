@@ -169,6 +169,9 @@ public class FileManager {
     private static void writeFile(String path, byte[] fileData) {
         try {
             File file = new File(workingDir.resolve(path).toString());
+            if(file.getParentFile() != null){
+                file.getParentFile().mkdirs();
+            }
             file.createNewFile();
             FileOutputStream fos = new FileOutputStream(file, false);
             fos.write(fileData);
