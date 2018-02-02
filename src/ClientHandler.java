@@ -52,6 +52,7 @@ public class ClientHandler {
 		// Connect and initial update
 
 		// Connect
+		//REPEAT!!!!!!!!!!!!!!!!!
 		int numServerErrors = 0;
 		try {
 			client = new Client(serverAddress, port, timeOut);
