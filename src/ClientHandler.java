@@ -61,7 +61,6 @@ public class ClientHandler {
             }
         } catch (NetworkingException e) {
             throw new NetworkingException("Connection refused");
-
         }
 
         try {

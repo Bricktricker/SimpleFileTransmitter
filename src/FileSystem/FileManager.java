@@ -100,7 +100,7 @@ public class FileManager {
     /**
      * creates folder at path location
      *
-     * @param relative path to new folder
+     * @param path (relative) to new folder
      */
     public static void createFolder(Path path) {
         workingDir.resolve(path).toFile().mkdirs();
