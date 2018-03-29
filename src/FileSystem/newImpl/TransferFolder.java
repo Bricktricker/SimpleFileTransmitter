@@ -54,7 +54,6 @@ public class TransferFolder {
             if(folderFile.getPath().equals(path))
                 return folderFile;
         }
-        
         return null;
     }
     
@@ -63,7 +62,6 @@ public class TransferFolder {
             if(folder.folderName.equals(path))
                 return folder;
         }
-        
         return null;
     }
     

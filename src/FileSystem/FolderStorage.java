@@ -15,6 +15,7 @@
  */
 package FileSystem;
 
+import FileSystem.newImpl.TransferFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -34,27 +35,89 @@ import java.nio.file.FileSystemException;
  * @author Philipp
  *
  */
-public class FileStorage implements Serializable {
+public class FolderStorage implements Serializable {
 
-    private static final long serialVersionUID = 3258695147163353327L;
-    private HashMap<String, String> fileMap; // Map with relative path, hash
+    private final String folderName;
+    private List<FolderStorage> subFolders;
+    private List<TransferFile> folderFiles;
 
     /**
      * Initializes FileStorage object
+     * @param path relative path to folder
      */
-    public FileStorage() {
-        fileMap = new HashMap<>();
+    public FolderStorage(String path) {
+        folderName = path;
+        subFolders = new ArrayList<>();
+        folderFiles = new ArrayList<>();
+    }
+    
+    public void load(){
+        File[] files = new File(FileManager.workingDir.resolve(folderName).toString()).listFiles();
+        for(File f : files){
+            String pathRel = FileManager.getRelPath(f.toPath()).toString();
+            if(f.isFile()){
+                try {
+                    String hash = FileManager.getHash(f);
+                    
+                    TransferFile tf = new TransferFile(pathRel, hash);
+                    folderFiles.add(tf);
+                } catch (FileSystemException e) {
+                    System.err.println("could not read " + e.getFile());
+                }
+            }else{
+                FolderStorage newStorage = new FolderStorage(pathRel);
+                newStorage.load();
+                subFolders.add(newStorage);
+            }
+        }
     }
 
     // updates fileMap and return List of changes
     public List<FileInfo> getChanges() {
-        List<FileInfo> changes = new LinkedList<>();
-        FileStorage newStorage = new FileStorage();
-        getChangesRecursive(changes, FileManager.workingDir.toString(), newStorage);
+        List<FileInfo> changeList = new LinkedList<>();
+        FolderStorage newStorage = new FolderStorage("");
+        
+        File[] files = new File(FileManager.workingDir.resolve(folderName).toString()).listFiles();
+        for(File f : files){
+            if(f.isFile()){
+                try {
+                    String hash = FileManager.getHash(f);
+                    String pathRel = FileManager.getRelPath(f.toPath()).toString();
+                    String oldHash = null;//getFile(pathRel).getHash();
+                    TransferFile tf = getFile(pathRel);
+                    if(tf != null){
+                        oldHash = tf.getHash();
+                    }    
+                    
+                    // File was added to project
+                    if (oldHash == null) {
+                        FileInfo info = new FileInfo(pathRel, hash);
+                        info.setAdded(true);
+                        changeList.add(info);
 
-        addDeletedFiles(changes, newStorage);
-        fileMap = newStorage.fileMap;
-        return changes;
+                    // File got updated
+                    } else if (!hash.equals(oldHash)) {
+                        FileInfo info = new FileInfo(pathRel, hash);
+                        changeList.add(info);
+                    }
+                    
+                    newStorage.folderFiles.add(new TransferFile(pathRel, hash));
+                    
+                } catch (FileSystemException e) {
+                    System.err.println("could not read " + e.getFile());
+                }
+            }
+        }
+        
+        for(FolderStorage fs : subFolders){
+            List<FileInfo> changes = fs.getChanges();
+            changeList.addAll(changes);
+        }
+
+        addDeletedFiles(changeList, newStorage);
+        subFolders = newStorage.subFolders;
+        folderFiles = newStorage.folderFiles;
+        return changeList;
     }
 
     /**
@@ -63,7 +126,7 @@ public class FileStorage implements Serializable {
      * @param absolute path to folder
      * @param storage where the new filesystem situation gets stored
      */
-    private void getChangesRecursive(List<FileInfo> changeList, String path, FileStorage newStorage) {
+    private void getChangesRecursive(List<FileInfo> changeList, String path, FolderStorage newStorage) {
         File[] files = new File(path).listFiles();
 
         for (File f : files) {
@@ -101,7 +164,7 @@ public class FileStorage implements Serializable {
     }
 
     // Searches for files which got deleted
-    private void addDeletedFiles(List<FileInfo> changeList, FileStorage newState) {
+    private void addDeletedFiles(List<FileInfo> changeList, FolderStorage newState) {
         Set<String> oldSet = fileMap.keySet();
         Set<String> newSet = newState.fileMap.keySet();
         oldSet.removeAll(newSet);
@@ -204,7 +267,24 @@ public class FileStorage implements Serializable {
     }
 
     public void clear() {
-        fileMap.clear();
+        subFolders.clear();
+        folderFiles.clear();
+    }
+    
+    public TransferFile getFile(String path){
+        for (TransferFile folderFile : folderFiles) {
+            if(folderFile.getPath().equals(path))
+                return folderFile;
+        }
+        return null;
+    }
+    
+    public FolderStorage getFolder(String path){
+        for(FolderStorage folder : subFolders){
+            if(folder.folderName.equals(path))
+                return folder;
+        }
+        return null;
     }
 
 }

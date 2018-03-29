@@ -47,8 +47,8 @@ public class FileManager {
      *
      * @return new FileStorage Object
      */
-    public static FileStorage createFileStorage() {
-        FileStorage storage = new FileStorage();
+    public static FolderStorage createFolderStorage() {
+        FolderStorage storage = new FolderStorage("");
         storage.updateStorage();
         return storage;
     }
@@ -78,10 +78,12 @@ public class FileManager {
      *
      * @return uninitialized new FileStorage
      */
+    /*
     public static FileStorage createEmptyStorage() {
         return new FileStorage();
     }
-
+    */
+    
     /**
      * Parses the FileInfo and apples changes to the file system
      *

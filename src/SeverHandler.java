@@ -62,7 +62,7 @@ public class SeverHandler {
 						Packet p = new Packet(PacketTypes.CONNECTED);
 						server.sendData(p);
 						break;
-					case GET_TREE:
+					case GET_STATUS:
 						storage.updateStorage();
 						Packet treePack = new Packet(PacketTypes.SEND_TREE, storage);
 						server.sendData(treePack);
