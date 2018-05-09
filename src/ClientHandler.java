@@ -17,9 +17,9 @@
 import FileSystem.ChangeList;
 import FileSystem.FileInfo;
 import FileSystem.FileManager;
-import FileSystem.FileStorage;
 import FileSystem.FolderInfo;
 import FileSystem.FolderWatcher;
+import FileSystem.newImpl.TransferFolder;
 import Utils.NetworkingException;
 
 import java.io.File;
@@ -66,10 +66,10 @@ public class ClientHandler {
         try {
             // Inital update
             // !!!!!!!Also get folder changes!!!!!!!!!!!
-            client.sendData(new Packet(PacketTypes.GET_TREE));
+            client.sendData(new Packet(PacketTypes.GET_STATUS));
             Packet retPack = client.readData();
 
-            FileStorage serverStorage = (FileStorage) retPack.get(0);
+            TransferFolder serverStorage = (TransferFolder) retPack.get(0);
             List<FileInfo> changes = serverStorage.getChanges();
             sendFileChanges(changes);
 

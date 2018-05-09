@@ -32,6 +32,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
 
+import FileSystem.newImpl.TransferFolder;
+
 /**
  * Static class for basic file handling
  *
@@ -43,13 +45,15 @@ public class FileManager {
     public static Path workingDir = Paths.get("").toAbsolutePath();
 
     /**
-     * returns a new initialized FileStorage
+     * returns a new initialized TransferFolder from the root dir
      *
-     * @return new FileStorage Object
+     * @return new TransferFolder Object
+     * @throws FileSystemException 
      */
-    public static FolderStorage createFolderStorage() {
-        FolderStorage storage = new FolderStorage("");
-        storage.updateStorage();
+    
+    public static TransferFolder createFolderStorage() throws FileSystemException {
+    	TransferFolder storage = new TransferFolder(workingDir.toString());
+        storage.load();
         return storage;
     }
 
@@ -72,17 +76,6 @@ public class FileManager {
     public static Path getRelPath(String filepath) {
         return getRelPath(workingDir.resolve(filepath));
     }
-
-    /**
-     * returns a new uninitialized FileStorage
-     *
-     * @return uninitialized new FileStorage
-     */
-    /*
-    public static FileStorage createEmptyStorage() {
-        return new FileStorage();
-    }
-    */
     
     /**
      * Parses the FileInfo and apples changes to the file system

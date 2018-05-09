@@ -1,8 +1,12 @@
 package FileSystem.newImpl;
 
+import java.io.File;
+import java.nio.file.FileSystemException;
 import java.util.ArrayList;
 import java.util.List;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+import FileSystem.FileInfo;
+import FileSystem.FileManager;
 
 /*
  * Copyright 2018 Philipp.
@@ -37,8 +41,26 @@ public class TransferFolder {
         folderFiles = new ArrayList<>();
     }
     
-    public void load(){
-        throw new NotImplementedException();
+    public void load() throws FileSystemException{
+        File folder = new File(FileManager.workingDir.resolve(folderName).toString());
+        for(File file : folder.listFiles()) {
+        	if(file.isDirectory()) {
+        		TransferFolder trFolder = new TransferFolder(FileManager.getRelPath(file.getPath()).toString());
+        		trFolder.load();
+        		subFolders.add(trFolder);
+        	}else if(file.isFile()) {
+        		folderFiles.add(new TransferFile(FileManager.getRelPath(file.getPath()).toString(), FileManager.getHash(file)));
+        	}
+        }
+    }
+    
+    public List<FileInfo> getChanges(){
+    	List<FileInfo> changes = new ArrayList<>();
+    	TransferFolder TffNew = new TransferFolder(folderName);
+    	
+    	
+    	
+    	return changes;
     }
     
     public void addFile(TransferFile file){

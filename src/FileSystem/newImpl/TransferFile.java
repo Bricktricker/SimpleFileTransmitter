@@ -23,8 +23,9 @@ import java.util.Objects;
  * @author Philipp
  */
 public class TransferFile implements Serializable{
-    
-    private final String filePath;
+
+	private static final long serialVersionUID = -3289573390277840858L;
+	private final String filePath;
     private final String fileHash;
     
     public TransferFile(String name, String hash){
