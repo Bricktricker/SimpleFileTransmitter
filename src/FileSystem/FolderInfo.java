@@ -35,13 +35,24 @@ public class FolderInfo extends Info implements Serializable {
 	private boolean removed;
 	private boolean renamed;
 
-        /**
-         * creates an folderPath object
-         * @param folderPath relative path to folder
-         */
+	/**
+	 * creates a FolderInfo object
+	 * @param folderPath relative path to folder
+	 */
 	public FolderInfo(String folderPath) {
 		path = folderPath;
 	}
+	
+	/**
+	 * creates a FolderInfo object 
+	 * @param folderPath relative path to folder
+	 * @param remOrAdd if true, folder got added, if false folder got removed
+	 */
+	public FolderInfo(String folderPath, boolean remOrAdd) {
+		path = folderPath;
+		added = remOrAdd;
+		removed = !remOrAdd;
+	} 
 
 	@Override
 	public String getPath() {

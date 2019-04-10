@@ -65,7 +65,7 @@ public class Client implements java.io.Closeable {
 			if (o instanceof Packet) {
 				return (Packet) o;
 			}
-			throw new NetworkingException("Data corrupted");
+			throw new NetworkingException("Data corrupted, no Packet received");
 		} catch (IOException e) {
 			throw new NetworkingException("Error reading data from the server");
 		} catch (ClassNotFoundException e) {

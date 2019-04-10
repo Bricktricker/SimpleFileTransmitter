@@ -18,8 +18,8 @@
 import java.io.IOException;
 import FileSystem.FileInfo;
 import FileSystem.FileManager;
-import FileSystem.FileStorage;
 import FileSystem.FolderInfo;
+import FileSystem.newImpl.TransferFolder;
 import Utils.NetworkingException;
 import networking.Packet;
 import networking.PacketTypes;
@@ -37,7 +37,7 @@ public class SeverHandler {
 
 	public static void handleServer() throws IOException {
 		while (true) {
-			FileStorage storage = FileManager.createFileStorage();
+			//FileStorage storage = FileManager.createFileStorage();
 			try {
 				server = new Server(port);
 				server.waitForUser();
@@ -63,8 +63,9 @@ public class SeverHandler {
 						server.sendData(p);
 						break;
 					case GET_STATUS:
-						storage.updateStorage();
-						Packet treePack = new Packet(PacketTypes.SEND_TREE, storage);
+						TransferFolder storage = new TransferFolder("");
+						storage.load();
+						Packet treePack = new Packet(PacketTypes.SEND_STATUS, storage);
 						server.sendData(treePack);
 						break;
 					case FOLDER_CHANGE:
@@ -86,7 +87,7 @@ public class SeverHandler {
 						server.sendData(recvPack);
 						break;
 					case ALL_PACK_SEND:
-						storage.updateStorage();
+						System.out.println("ALL_PACK_SEND packet received");
 						break;
 					case KEEP_ALIVE:
 						break;
@@ -98,7 +99,7 @@ public class SeverHandler {
 				//try after while connected
 				}catch (NetworkingException e) {
 					String errStr = "Error in server";
-					if (e.getCause() != null)
+					if (e.getMessage() != null && !e.getMessage().isEmpty())
 						errStr = e.getMessage();
 
 					throw new NetworkingException(errStr);

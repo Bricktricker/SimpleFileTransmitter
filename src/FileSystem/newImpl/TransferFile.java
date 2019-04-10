@@ -22,7 +22,7 @@ import java.util.Objects;
  *
  * @author Philipp
  */
-public class TransferFile implements Serializable{
+public class TransferFile implements Serializable {
 
 	private static final long serialVersionUID = -3289573390277840858L;
 	private final String filePath;

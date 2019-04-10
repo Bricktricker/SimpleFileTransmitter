@@ -58,7 +58,7 @@ public class Server implements java.io.Closeable {
 			inStream.close();
 			userSocket.close();
 		} catch (IOException e) {
-			throw new NetworkingException();
+			throw new NetworkingException("Error disconnecting client");
 		}
 	}
 
@@ -85,7 +85,6 @@ public class Server implements java.io.Closeable {
 				throw new NetworkingException(e.getMessage());
 
 			throw new NetworkingException("Error while user connected");
-
 		}
 	}
 
@@ -94,6 +93,9 @@ public class Server implements java.io.Closeable {
 			Object o = inStream.readObject();
 			if (o instanceof Packet) {
 				return (Packet) o;
+			}else {
+				System.err.println("Unknown Object received");
+				return null;
 			}
 		} catch (IOException ex) {
 			try {

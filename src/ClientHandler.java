@@ -64,14 +64,20 @@ public class ClientHandler {
         }
 
         try {
-            // Inital update
-            // !!!!!!!Also get folder changes!!!!!!!!!!!
+            // Initial update
             client.sendData(new Packet(PacketTypes.GET_STATUS));
             Packet retPack = client.readData();
+            
+            if(retPack.getType() != PacketTypes.SEND_STATUS) {
+            	throw new NetworkingException("PacketType missmatch!!");
+            }
 
             TransferFolder serverStorage = (TransferFolder) retPack.get(0);
-            List<FileInfo> changes = serverStorage.getChanges();
-            sendFileChanges(changes);
+            List<FolderInfo> folderChanges = serverStorage.getFolderChanges();
+            sendFolderChanges(folderChanges);
+            
+            List<FileInfo> fileChanges = serverStorage.getFileChanges();
+            sendFileChanges(fileChanges);
 
         } catch (NetworkingException e) {
             System.err.println("Could not connect to Server");

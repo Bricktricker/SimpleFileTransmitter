@@ -32,6 +32,7 @@ public class MapDifference {
 	 * @param right second map
 	 * @return set of symmetric difference
 	 */
+	@Deprecated
     public static <K, V> Set<Entry<K, V>> symmetricMapDifference(Map<K,V> left, Map<K,V> right) {
         Set<Entry<K, V>> diff12 = new HashSet<>(left.entrySet());
         Set<Entry<K, V>> diff21 = new HashSet<>(right.entrySet());

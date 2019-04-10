@@ -75,6 +75,11 @@ public class Main {
 			System.err.println("No type specivied \n Use either -server or -client");
 			System.exit(1);
 		}
+		
+		if(appType == AppType.CLIENT && ClientHandler.serverAddress.isEmpty()) {
+			System.err.println("No ip specified for client to connect to");
+			System.exit(1);
+		}
 
 		try {
 			if (appType == AppType.SERVER) {

@@ -38,6 +38,13 @@ public class FileInfo extends Info implements Serializable {
 		added = false;
 		removed = false;
 	}
+	
+	public FileInfo(String path, String hash, boolean added, boolean removed) {
+		filePath = path;
+		fileHash = hash;
+		this.added = added;
+		this.removed = removed;
+	}
 
 	@Override
 	public String getPath() {
