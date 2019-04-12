@@ -74,7 +74,7 @@ public class FileManager {
      * @return relative path to file
      */
     public static Path getRelPath(String filepath) {
-        return getRelPath(workingDir.resolve(filepath));
+    	return getRelPath(Paths.get(filepath));
     }
     
     /**

@@ -104,6 +104,8 @@ public class FileInfo extends Info implements Serializable {
 		if (!obj.getClass().equals(getClass()))
 			return false;
 
+		
+		//TODO: Do we also need to comapre fileHashes??
 		FileInfo other = (FileInfo) obj;
 		boolean filePathDif = filePath.equals(other.filePath);
 		// boolean hashDif = fileHash.equals(other.fileHash);

@@ -77,7 +77,9 @@ public class TransferFolder implements Serializable {
     	    		int index = TffNew.folderFiles.indexOf(f);
     	    		if(index == -1)
     	    			return false;
-    	    		return !TffNew.folderFiles.get(index).equals(f);
+    	    		
+    	    		System.out.println("Return " + !TffNew.folderFiles.get(index).equalsWithHash(f) + " for " + f.toString());
+    	    		return !TffNew.folderFiles.get(index).equalsWithHash(f);
     	    	}
     	    	).map(f -> new FileInfo(f.getPath(), f.getHash()))		
     	).collect(Collectors.toList());
@@ -104,6 +106,7 @@ public class TransferFolder implements Serializable {
     	return Stream.concat(
         		this.subFolders.stream().filter(c->TffNew.subFolders.contains(c)).map(f -> new FolderInfo(f.folderName, false)),
         		TffNew.subFolders.stream().filter(c->this.subFolders.contains(c)).map(f -> new FolderInfo(f.folderName, true))
+        		//TODO: Unterordner von neuen Ordnern werden nicht erkannt
         	).collect(Collectors.toList());
     }
     

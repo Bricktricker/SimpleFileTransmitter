@@ -41,6 +41,11 @@ public class TransferFile implements Serializable {
         return fileHash;
     }
     
+    /**
+     * Compares two TransferFile objects
+     * Only compares fileNames, not file hashes
+     * To also check file hashes, call equalsWithHash
+     */
     @Override
     public boolean equals(Object obj){
         if(obj == null)
@@ -51,9 +56,21 @@ public class TransferFile implements Serializable {
             return false;
         
         TransferFile other = (TransferFile)obj;
+        
+        System.out.println("compare " + this.toString() + " with " + other.toString());
+        
         boolean pathEquals = filePath.equals(other.filePath);
-        boolean hashEquals = fileHash.equals(other.fileHash);
-        return pathEquals && hashEquals;
+        return pathEquals;
+    }
+    
+    /**
+     * Compares to TransferFile objects
+     */
+    public boolean equalsWithHash(TransferFile file) {
+    	if(!this.equals(file)) {
+    		return false;
+    	}
+    	return this.fileHash.equals(file.fileHash);
     }
 
     @Override
@@ -62,6 +79,11 @@ public class TransferFile implements Serializable {
         hash = 59 * hash + Objects.hashCode(this.filePath);
         hash = 59 * hash + Objects.hashCode(this.fileHash);
         return hash;
+    }
+    
+    @Override
+    public String toString() {
+    	return this.filePath + " " + this.fileHash;
     }
     
 }

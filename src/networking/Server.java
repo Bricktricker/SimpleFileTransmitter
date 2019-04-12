@@ -27,7 +27,7 @@ import Utils.NetworkingException;
  * basic server implementation for sending packages
  * @author Philipp
  */
-public class Server implements java.io.Closeable {
+public class Server implements java.io.Closeable, AutoCloseable {
 
 	private final ServerSocket socket;
 	private Socket userSocket;
@@ -44,7 +44,7 @@ public class Server implements java.io.Closeable {
 		try {
 			socket = new ServerSocket(port);
 		} catch (IOException e) {
-			throw new NetworkingException();
+			throw new NetworkingException("Error creating ServerSocket");
 		}
 	}
 

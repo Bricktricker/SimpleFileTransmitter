@@ -37,7 +37,6 @@ public class SeverHandler {
 
 	public static void handleServer() throws IOException {
 		while (true) {
-			//FileStorage storage = FileManager.createFileStorage();
 			try {
 				server = new Server(port);
 				server.waitForUser();
@@ -100,11 +99,14 @@ public class SeverHandler {
 				}catch (NetworkingException e) {
 					String errStr = "Error in server";
 					if (e.getMessage() != null && !e.getMessage().isEmpty())
-						errStr = e.getMessage();
+						errStr += "\n" + e.getMessage();
 
 					throw new NetworkingException(errStr);
 				}
 			}//while connected
+			//User disconnected
+			server.close();
+			
 		}//endless loop
 	}
 

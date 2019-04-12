@@ -197,8 +197,7 @@ public class ClientHandler {
         }
     }
 
-    private static void sendFileChanges(List<FileInfo> changes)
-            throws NetworkingException {
+    private static void sendFileChanges(List<FileInfo> changes) throws NetworkingException {
         for (FileInfo info : changes) {
             try {
 
