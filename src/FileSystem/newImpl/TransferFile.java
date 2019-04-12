@@ -55,12 +55,8 @@ public class TransferFile implements Serializable {
         if(!obj.getClass().equals(getClass()))
             return false;
         
-        TransferFile other = (TransferFile)obj;
-        
-        System.out.println("compare " + this.toString() + " with " + other.toString());
-        
-        boolean pathEquals = filePath.equals(other.filePath);
-        return pathEquals;
+        TransferFile other = (TransferFile)obj; 
+        return filePath.equals(other.filePath);
     }
     
     /**

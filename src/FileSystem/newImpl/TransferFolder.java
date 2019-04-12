@@ -71,8 +71,8 @@ public class TransferFolder implements Serializable {
     	
     	//List of files that got changed in the current directory
     	List<FileInfo> changesRoot = Stream.concat(Stream.concat(
-    	this.folderFiles.stream().filter(c->!TffNew.folderFiles.contains(c)).map(f -> new FileInfo(f.getPath(), f.getHash(), false, true)),
-    	TffNew.folderFiles.stream().filter(c->!this.folderFiles.contains(c)).map(f -> new FileInfo(f.getPath(), f.getHash(), true, false))),
+    	this.folderFiles.stream().filter(c->!TffNew.folderFiles.contains(c)).map(f -> new FileInfo(f.getPath(), f.getHash(), false, true)), //removed file
+    	TffNew.folderFiles.stream().filter(c->!this.folderFiles.contains(c)).map(f -> new FileInfo(f.getPath(), f.getHash(), true, false))), //added file
     			this.folderFiles.stream().filter(f-> {
     	    		int index = TffNew.folderFiles.indexOf(f);
     	    		if(index == -1)
@@ -81,7 +81,7 @@ public class TransferFolder implements Serializable {
     	    		System.out.println("Return " + !TffNew.folderFiles.get(index).equalsWithHash(f) + " for " + f.toString());
     	    		return !TffNew.folderFiles.get(index).equalsWithHash(f);
     	    	}
-    	    	).map(f -> new FileInfo(f.getPath(), f.getHash()))		
+    	    	).map(f -> new FileInfo(f.getPath(), f.getHash())) //Changed file
     	).collect(Collectors.toList());
     	
     	//List of file changes in sub folder
@@ -103,11 +103,20 @@ public class TransferFolder implements Serializable {
     	TransferFolder TffNew = new TransferFolder(folderName);
     	TffNew.load();
     	
-    	return Stream.concat(
-        		this.subFolders.stream().filter(c->TffNew.subFolders.contains(c)).map(f -> new FolderInfo(f.folderName, false)),
-        		TffNew.subFolders.stream().filter(c->this.subFolders.contains(c)).map(f -> new FolderInfo(f.folderName, true))
-        		//TODO: Unterordner von neuen Ordnern werden nicht erkannt
+    	List<FolderInfo> changedFolder = Stream.concat(Stream.concat(
+        		this.subFolders.stream().filter(c->TffNew.subFolders.contains(c)).map(f -> new FolderInfo(f.folderName, false)), //Removed folder
+        		TffNew.subFolders.stream().filter(c->this.subFolders.contains(c)).map(f -> new FolderInfo(f.folderName, true))), //Added folder
+    			TffNew.subFolders.stream().filter(c->this.subFolders.contains(c)).map(f -> {
+    				try {
+						return f.getFolderChanges();
+					} catch (FileSystemException e) {
+						e.printStackTrace();
+					}
+    				return null;
+    			}).flatMap(List::stream) //Subfolder changes
         	).collect(Collectors.toList());
+    	
+    	return changedFolder;
     }
     
     public void addFile(TransferFile file){
