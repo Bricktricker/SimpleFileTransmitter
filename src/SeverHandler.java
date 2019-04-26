@@ -52,7 +52,7 @@ public class SeverHandler {
 				try {
 					Packet pack = server.getData();
 					if (pack == null) {
-						continue;
+						continue; //Continue so, server.isConnected() returns false
 					}
 
 					PacketTypes type = pack.getType();

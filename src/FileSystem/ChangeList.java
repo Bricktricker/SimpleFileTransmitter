@@ -17,8 +17,9 @@ package FileSystem;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * This class holds all changes in a directory or changed files.
@@ -27,7 +28,7 @@ import java.util.List;
  */
 public class ChangeList<T extends Info> {
 
-	private final HashMap<String, T> changes;
+	private final Map<String, T> changes;
 
 	public ChangeList() {
 		changes = new HashMap<>();
@@ -50,9 +51,7 @@ public class ChangeList<T extends Info> {
 
 	public List<T> getAllChanges() {
 		Collection<T> changeCollection = changes.values();
-		List<T> changesAsList = new LinkedList<>();
-		changeCollection.forEach(v -> changesAsList.add(v));
-		return changesAsList;
+		return changeCollection.stream().collect(Collectors.toList());
 	}
 
 	public boolean containsKey(String path) {
